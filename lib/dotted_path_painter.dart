@@ -2,12 +2,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class CropPathPainter extends CustomPainter {
+class DottedCropPathPainter extends CustomPainter {
   Path path;
 
-  CropPathPainter({this.path});
+  DottedCropPathPainter({this.path});
 
-  static Widget drawPath(Path path) => CustomPaint(painter: CropPathPainter(path: path));
+  static Widget drawPath(Path path) => CustomPaint(painter: DottedCropPathPainter(path: path));
 
   Paint _paint = Paint()
     ..color = Colors.white
