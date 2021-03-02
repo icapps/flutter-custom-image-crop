@@ -28,7 +28,7 @@ class CustomImageCrop extends StatefulWidget {
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.5),
     this.backgroundColor = Colors.white,
     this.path,
-    this.shape = CustomCropShape.Square,
+    this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
   }) : super(key: key);
@@ -76,20 +76,6 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
       imageAsUIImage = imageInfo.image;
     });
   }
-
-  // Future<void> getUiImage(ImageProvider imageProvide) async {
-  //   Completer<ImageInfo> completer = Completer();
-  //   imageProvide.resolve(ImageConfiguration()).addListener(ImageStreamListener((ImageInfo info, bool _) {
-  //     completer.complete(info);
-  //   }));
-  //   ImageInfo imageInfo = await completer.future;
-  //   final ByteData assetImageByteData = await imageInfo.image.toByteData(format: ui.ImageByteFormat.png);
-  //   final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(assetImageByteData.buffer.asUint8List());
-  //   final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
-  //   ui.Codec codec = await descriptor.instantiateCodec();
-  //   ui.FrameInfo frameInfo = await codec.getNextFrame();
-  //   imageAsUIImage = frameInfo.image;
-  // }
 
   @override
   void dispose() {
@@ -205,31 +191,28 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     if (imageAsUIImage == null) {
       return null;
     }
-    final cropWidth = (min(width, height) * widget.cropPercentage).floor();
+    final cropWidth = min(width, height) * widget.cropPercentage;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    // final matrix4Clip = Matrix4.diagonal3(vector_math.Vector3.all(1))..translate(cropWidth / 2, cropWidth / 2);
-    final clipPath = Path.from(path); //..transform(matrix4Clip.storage);
     final defaultScale = min(imageAsUIImage.width / cropWidth, imageAsUIImage.height / cropWidth);
     final scale = data.scale * defaultScale / 2;
+    final clipPath = Path.from(getPath(cropWidth, cropWidth, cropWidth));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 0))
       ..translate(data.x + cropWidth / 2, data.y + cropWidth / 2)
       ..scale(scale)
       ..rotateZ(data.angle);
-    // ..translate(data.x + cropWidth / 2, data.y + cropWidth / 2);
     final bgPaint = Paint()
       ..color = widget.backgroundColor
       ..style = PaintingStyle.fill;
-    canvas.drawRect(Rect.fromLTWH(0, 0, cropWidth.toDouble(), cropWidth.toDouble()), bgPaint);
+    canvas.drawRect(Rect.fromLTWH(0, 0, cropWidth, cropWidth), bgPaint);
     canvas.save();
+    canvas.clipPath(clipPath);
     final paint = Paint()..isAntiAlias = false;
-    print('$data');
     canvas.transform(matrix4Image.storage);
     canvas.drawImage(imageAsUIImage, Offset(-imageAsUIImage.width / 2, -imageAsUIImage.height / 2), paint);
-    // canvas.clipPath(clipPath);
     canvas.restore();
     ui.Picture picture = pictureRecorder.endRecording();
-    ui.Image image = await picture.toImage(cropWidth, cropWidth);
+    ui.Image image = await picture.toImage(cropWidth.floor(), cropWidth.floor());
 
     // Optionally remove magenta from image by evaluating every pixel
     // See https://github.com/brendan-duncan/image/blob/master/lib/src/transform/copy_crop.dart
