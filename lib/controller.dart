@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CustomImageCropController {
   final listeners = <CustomImageCropListener>[];
 
-  RawImage onCropImage() => listeners.map((e) => e.onCropImage()).firstWhere((element) => element != null, orElse: () => null);
+  Future<MemoryImage> onCropImage() => listeners.map((e) => e.onCropImage()).firstWhere((element) => element != null, orElse: () => null);
 
   CropImageData get cropImageData => listeners.map((e) => e.data).firstWhere((element) => element != null, orElse: () => null);
 
@@ -25,6 +25,8 @@ class CustomImageCropController {
   void addTransition(CropImageData transition) {
     listeners.forEach((e) => e.addTransition(transition));
   }
+
+  void reset() => setData(CropImageData());
 
   void setData(CropImageData data) {
     listeners.forEach((e) => e.setData(data));
@@ -51,5 +53,5 @@ mixin CustomImageCropListener {
 
   void setData(CropImageData transition);
 
-  RawImage onCropImage();
+  Future<MemoryImage> onCropImage();
 }
