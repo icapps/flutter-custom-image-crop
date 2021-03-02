@@ -51,7 +51,6 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   @override
   void initState() {
     controller?.addListener(this);
-    // getUiImage(widget.image);
     super.initState();
   }
 
