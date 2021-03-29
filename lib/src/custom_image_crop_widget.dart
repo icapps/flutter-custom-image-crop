@@ -31,7 +31,7 @@ class CustomImageCrop extends StatefulWidget {
     this.backgroundColor = Colors.white,
     this.path,
     this.shape = CustomCropShape.Circle,
-    this.cropPercentage = 1,
+    this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
   }) : super(key: key);
 
@@ -115,16 +115,9 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   child: Transform(
                     transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, 0))
                       ..rotateZ(data.angle)
-                      ..translate(-width / 2, -height / 2),
-                    child: Container(
-                      width: width,
-                      height: height,
-                      child: Center(
-                        child: Image(
-                          image: widget.image,
-                          fit: BoxFit.none,
-                        ),
-                      ),
+                      ..translate(-imageAsUIImage.width / 2, -imageAsUIImage.height / 2),
+                    child: Image(
+                      image: widget.image,
                     ),
                   ),
                 ),
