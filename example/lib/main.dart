@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   final String title;
 
-  MyHomePage({Key key, @required this.title}) : super(key: key);
+  MyHomePage({@required this.title, Key key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
