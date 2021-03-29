@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:custom_image_crop/custom_image_crop.dart';
+import 'package:example/resultScreen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,13 +32,26 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final controller = CustomImageCropController();
+  CustomImageCropController controller;
+
+  @override
+  void initState() {
+    controller = CustomImageCropController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        brightness: Brightness.dark,
       ),
       body: Column(
         children: [
@@ -55,27 +69,15 @@ class _MyHomePageState extends State<MyHomePage> {
               IconButton(icon: Icon(Icons.rotate_left), onPressed: () => controller.addTransition(CropImageData(angle: -pi / 4))),
               IconButton(icon: Icon(Icons.rotate_right), onPressed: () => controller.addTransition(CropImageData(angle: pi / 4))),
               IconButton(
-                  icon: Icon(Icons.crop),
-                  onPressed: () async {
-                    final image = await controller.onCropImage();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => Column(children: [
-                          Expanded(child: Container()),
-                          Image(
-                            image: image,
-                          ),
-                          RaisedButton(
-                            child: Text('Back'),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                          Expanded(child: Container()),
-                        ]),
-                      ),
-                    );
-                  }),
+                icon: Icon(Icons.crop),
+                onPressed: () async {
+                  final image = await controller.onCropImage();
+                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ResultScreen(image: image)));
+                },
+              ),
             ],
           ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),
     );

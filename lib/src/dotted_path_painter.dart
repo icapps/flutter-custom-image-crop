@@ -3,27 +3,28 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class DottedCropPathPainter extends CustomPainter {
-  Path path;
+  static const dashWidth = 10.0;
+  static const dashSpace = 5.0;
+  static const strokeWidth = 4.0;
+  final Path _path;
 
-  DottedCropPathPainter({this.path});
+  DottedCropPathPainter(this._path);
 
-  static Widget drawPath(Path path) => CustomPaint(painter: DottedCropPathPainter(path: path));
+  static Widget drawPath(Path path) => CustomPaint(painter: DottedCropPathPainter(path));
 
-  Paint _paint = Paint()
+  final _paint = Paint()
     ..color = Colors.white
-    ..strokeWidth = 4.0
+    ..strokeWidth = strokeWidth
     ..style = PaintingStyle.stroke
     ..strokeJoin = StrokeJoin.round;
 
   @override
   void paint(Canvas canvas, Size size) {
-    Path dashPath = Path();
+    final dashPath = Path();
 
-    double dashWidth = 10.0;
-    double dashSpace = 5.0;
-    double distance = 0.0;
+    var distance = 0.0;
 
-    for (PathMetric pathMetric in path.computeMetrics()) {
+    for (final pathMetric in _path.computeMetrics()) {
       while (distance < pathMetric.length) {
         dashPath.addPath(
           pathMetric.extractPath(distance, distance + dashWidth),
@@ -37,5 +38,5 @@ class DottedCropPathPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_) => false;
+  bool shouldRepaint(DottedCropPathPainter oldClipper) => oldClipper._path != _path;
 }

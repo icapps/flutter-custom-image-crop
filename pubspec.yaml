@@ -12,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
   gesture_x_detector: ^0.0.5
-  # image: ^2.1.19
 
 dev_dependencies:
   flutter_test:
