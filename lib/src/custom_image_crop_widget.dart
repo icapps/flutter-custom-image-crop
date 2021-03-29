@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -36,11 +35,10 @@ class CustomImageCrop extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _CustomImageCropState createState() => _CustomImageCropState(cropController);
+  _CustomImageCropState createState() => _CustomImageCropState();
 }
 
 class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropListener {
-  CustomImageCropController controller;
   CropImageData dataTransitionStart;
   Path path;
   double width, height;
@@ -48,11 +46,9 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   ImageStream _imageStream;
   ImageStreamListener _imageListener;
 
-  _CustomImageCropState(this.controller);
-
   @override
   void initState() {
-    controller?.addListener(this);
+    widget.cropController?.addListener(this);
     super.initState();
   }
 
@@ -62,17 +58,17 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     _getImage();
   }
 
-  void _getImage({bool force = false}) {
+  void _getImage() {
     final oldImageStream = _imageStream;
     _imageStream = widget.image.resolve(createLocalImageConfiguration(context));
-    if (_imageStream.key != oldImageStream?.key || force) {
+    if (_imageStream.key != oldImageStream?.key) {
       oldImageStream?.removeListener(_imageListener);
       _imageListener = ImageStreamListener(_updateImage);
       _imageStream.addListener(_imageListener);
     }
   }
 
-  void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
+  void _updateImage(ImageInfo imageInfo, _) {
     setState(() {
       imageAsUIImage = imageInfo.image;
     });
@@ -81,14 +77,14 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   @override
   void dispose() {
     _imageStream?.removeListener(_imageListener);
-    controller?.removeListener(this);
+    widget.cropController?.removeListener(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (imageAsUIImage == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -100,9 +96,9 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
         path = getPath(cropWidth, width, height);
         return XGestureDetector(
           onMoveStart: onMoveStart,
-          onMoveUpdate: (details) => onMoveUpdate(details, path),
+          onMoveUpdate: onMoveUpdate,
           onScaleStart: onScaleStart,
-          onScaleUpdate: (details) => onScaleUpdate(details, path),
+          onScaleUpdate: onScaleUpdate,
           child: Container(
             width: width,
             height: height,
@@ -144,7 +140,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     dataTransitionStart = null; // Reset for update
   }
 
-  void onScaleUpdate(ScaleEvent event, Path path) {
+  void onScaleUpdate(ScaleEvent event) {
     if (dataTransitionStart != null) {
       addTransition(dataTransitionStart - CropImageData(scale: event.scale, angle: event.rotationAngle));
     }
@@ -155,7 +151,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     dataTransitionStart = null; // Reset for update
   }
 
-  void onMoveUpdate(MoveEvent event, Path path) {
+  void onMoveUpdate(MoveEvent event) {
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
@@ -217,6 +213,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
     ui.Picture picture = pictureRecorder.endRecording();
     ui.Image image = await picture.toImage(cropWidth.floor(), cropWidth.floor());
+    // Adding compute would be preferrable. Unfortunately we cannot pass an ui image to this.
+    // A workaround would be to save the image and load it inside of the isolate
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
 
     return MemoryImage(bytes.buffer.asUint8List());
@@ -248,12 +246,4 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 enum CustomCropShape {
   Circle,
   Square,
-}
-
-Future<ByteData> computeToByteData(Map<String, dynamic> data) async {
-  ui.PictureRecorder pictureRecorder = data['pictureRecorder'];
-  double cropWidth = data['cropWidth'];
-  ui.Picture picture = pictureRecorder.endRecording();
-  ui.Image image = await picture.toImage(cropWidth.floor(), cropWidth.floor());
-  return await image.toByteData(format: ui.ImageByteFormat.png);
 }

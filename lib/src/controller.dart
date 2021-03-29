@@ -4,46 +4,29 @@ import 'package:flutter/material.dart';
 class CustomImageCropController {
   final listeners = <CustomImageCropListener>[];
 
-  Future<MemoryImage> onCropImage() => listeners.map((e) => e.onCropImage()).firstWhere((element) => element != null, orElse: () => null);
+  Future<MemoryImage> onCropImage() => listeners.map((e) => e.onCropImage()).firstWhere(
+        (element) => element != null,
+        orElse: () => null,
+      );
 
-  CropImageData get cropImageData => listeners.map((e) => e.data).firstWhere((element) => element != null, orElse: () => null);
+  CropImageData get cropImageData => listeners.map((e) => e.data).firstWhere(
+        (element) => element != null,
+        orElse: () => null,
+      );
 
-  void addListener(CustomImageCropListener listener) {
-    listeners.add(listener);
-  }
+  void addListener(CustomImageCropListener listener) => listeners.add(listener);
 
-  void removeListener(CustomImageCropListener listener) {
-    listeners.remove(listener);
-  }
+  void removeListener(CustomImageCropListener listener) => listeners.remove(listener);
 
   void notifyListeners() => addTransition(CropImageData());
 
-  void dispose() {
-    listeners.clear();
-  }
+  void dispose() => listeners.clear();
 
-  void addTransition(CropImageData transition) {
-    listeners.forEach((e) => e.addTransition(transition));
-  }
+  void addTransition(CropImageData transition) => listeners.forEach((e) => e.addTransition(transition));
 
   void reset() => setData(CropImageData());
 
-  void setData(CropImageData data) {
-    listeners.forEach((e) => e.setData(data));
-  }
-
-  void rotateImage({double angle, double angleIncrease}) {
-    assert(angle != null && angleIncrease != 0);
-    notifyListeners();
-  }
-
-  void translateImage({double dx, double dy, double x, double y, Offset translation, Offset position}) {
-    notifyListeners();
-  }
-
-  void scaleImage({double scale, double dscale}) {
-    notifyListeners();
-  }
+  void setData(CropImageData data) => listeners.forEach((e) => e.setData(data));
 }
 
 mixin CustomImageCropListener {

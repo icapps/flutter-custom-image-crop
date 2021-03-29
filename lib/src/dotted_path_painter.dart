@@ -21,9 +21,7 @@ class DottedCropPathPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final dashPath = Path();
-
     var distance = 0.0;
-
     for (final pathMetric in _path.computeMetrics()) {
       while (distance < pathMetric.length) {
         dashPath.addPath(
@@ -38,5 +36,5 @@ class DottedCropPathPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(DottedCropPathPainter oldClipper) => oldClipper._path != _path;
+  bool shouldRepaint(covariant DottedCropPathPainter oldClipper) => oldClipper._path != _path;
 }

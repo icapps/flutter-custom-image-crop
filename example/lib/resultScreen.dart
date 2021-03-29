@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ResultScreen extends StatelessWidget {
   final MemoryImage image;
 
-  const ResultScreen({this.image, Key key}) : super(key: key);
+  const ResultScreen({@required this.image, Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,15 +15,15 @@ class ResultScreen extends StatelessWidget {
       body: Center(
         child: Column(
           children: [
-            Spacer(),
+            const Spacer(),
             Image(
               image: image,
             ),
             ElevatedButton(
-              child: Text('Back'),
+              child: const Text('Back'),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            Spacer(),
+            const Spacer(),
           ],
         ),
       ),
