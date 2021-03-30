@@ -70,7 +70,7 @@ class MyHomePage extends StatefulWidget {
 
   MyHomePage({
     required this.title,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -78,7 +78,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  CustomImageCropController controller;
+  late CustomImageCropController controller;
 
   @override
   void initState() {
@@ -118,7 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: const Icon(Icons.crop),
                 onPressed: () async {
                   final image = await controller.onCropImage();
-                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ResultScreen(image: image)));
+                  if (image != null) {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ResultScreen(image: image)));
+                  }
                 },
               ),
             ],

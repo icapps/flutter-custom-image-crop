@@ -108,8 +108,9 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
       builder: (context, constraints) {
         width = constraints.maxWidth;
         height = constraints.maxHeight;
+        final image = imageAsUIImage!;
         final cropWidth = min(width, height) * widget.cropPercentage;
-        final defaultScale = min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
+        final defaultScale = min(image.width, image.height) / cropWidth;
         final scale = data.scale * defaultScale;
         path = _getPath(cropWidth, width, height);
         return XGestureDetector(
@@ -129,7 +130,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   child: Transform(
                     transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, 0))
                       ..rotateZ(data.angle)
-                      ..translate(-imageAsUIImage!.width / 2, -imageAsUIImage!.height / 2),
+                      ..translate(-image.width / 2, -image.height / 2),
                     child: Image(
                       image: widget.image,
                     ),
