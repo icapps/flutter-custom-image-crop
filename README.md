@@ -28,8 +28,6 @@ The color above the image that will be cropped
 The color behind the image. This color will also be used when there are gaps/empty space after the cropping
 
 ### shape
-path must be null
-
 The shape of the cropping path.
 
 ### cropPercentage
