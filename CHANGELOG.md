@@ -1,3 +1,5 @@
-## [0.0.1] - TODO: Add release date.
+## [0.0.1] - 30/03/2021
 
-* TODO: Describe initial release.
+* Added custom crop
+* Added Cicrle and Square crop shapes
+* Added Solid and Dotted painters for crop border
