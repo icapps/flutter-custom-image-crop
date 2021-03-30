@@ -2,9 +2,7 @@
 
 An Image cropper that is customizable
 
-<img src="./example/screenshots/customimagecrop.gif" alt="customcropcircle" height="320"/>
-<img src="./example/screenshots/customcropsquare.png" alt="customcropsquare" height="320"/>
-<img src="./example/screenshots/customcropcircle.png" alt="customcropcircle" height="320"/>
+<img src="./example/screenshots/customimagecrop.gif" alt="customcropcircle" height="320"/> <img src="./example/screenshots/customcropsquare.png" alt="customcropsquare" height="320"/> <img src="./example/screenshots/customcropcircle.png" alt="customcropcircle" height="320"/>
 
 # CustomImageCrop
 
