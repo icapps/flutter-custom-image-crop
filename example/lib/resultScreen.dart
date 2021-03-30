@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 class ResultScreen extends StatelessWidget {
   final MemoryImage image;
 
-  const ResultScreen({@required this.image, Key key}) : super(key: key);
+  const ResultScreen({
+    @required this.image,
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

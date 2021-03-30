@@ -25,7 +25,10 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   final String title;
 
-  MyHomePage({@required this.title, Key key}) : super(key: key);
+  MyHomePage({
+    @required this.title,
+    Key key,
+  }) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -36,8 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    controller = CustomImageCropController();
     super.initState();
+    controller = CustomImageCropController();
   }
 
   @override
@@ -69,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
               IconButton(icon: const Icon(Icons.rotate_left), onPressed: () => controller.addTransition(CropImageData(angle: -pi / 4))),
               IconButton(icon: const Icon(Icons.rotate_right), onPressed: () => controller.addTransition(CropImageData(angle: pi / 4))),
               IconButton(
-                icon: Icon(Icons.crop),
+                icon: const Icon(Icons.crop),
                 onPressed: () async {
                   final image = await controller.onCropImage();
                   Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ResultScreen(image: image)));

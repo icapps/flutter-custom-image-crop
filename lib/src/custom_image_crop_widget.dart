@@ -17,15 +17,32 @@ class CustomImageCrop extends StatefulWidget {
   final CustomImageCropController cropController;
   final Color backgroundColor;
   final Color overlayColor;
-  final Function(double) path;
+  final Path Function(double, double, double) path; // Custom crop path using cropwidth, width and height
   final CustomCropShape shape;
   final double cropPercentage;
-  final Widget Function(Path) drawPath;
+  final CustomPaint Function(Path) drawPath;
 
+  /// A custom image cropper widget
+  ///
+  /// Uses a `CustomImageCropController` to crop the image.
+  /// With the controller you can rotate, translate and/or
+  /// scale with buttons and sliders. This can also be
+  /// achieved with gestures
+  ///
+  /// Provide a `path`-function on how we should crop or use
+  /// a `shape` with `CustomCropShape.Circle` or
+  /// `CustomCropShape.Square`
+  ///
+  /// You can increase the cropping area using `cropPercentage`
+  ///
+  /// Change the cropping border by changing `drawPath`,
+  /// we've provided two default painters as inspiration
+  /// `DottedCropPathPainter.drawPath` and
+  /// `SolidCropPathPainter.drawPath`
   const CustomImageCrop({
     @required this.image,
+    @required this.cropController,
     Key key,
-    this.cropController,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.5),
     this.backgroundColor = Colors.white,
     this.path,
@@ -48,8 +65,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   @override
   void initState() {
-    widget.cropController?.addListener(this);
     super.initState();
+    widget.cropController.addListener(this);
   }
 
   @override
@@ -77,7 +94,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   @override
   void dispose() {
     _imageStream?.removeListener(_imageListener);
-    widget.cropController?.removeListener(this);
+    widget.cropController.removeListener(this);
     super.dispose();
   }
 
@@ -157,7 +174,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   Path getPath(double cropWidth, double width, double height) {
     if (widget.path != null) {
-      return widget.path(cropWidth);
+      return widget.path(cropWidth, width, height);
     }
     switch (widget.shape) {
       case CustomCropShape.Circle:
