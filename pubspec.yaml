@@ -4,13 +4,13 @@ version: 0.0.1
 homepage: https://github.com/icapps/flutter-custom-image-crop
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.0.2"
 
 dependencies:
   flutter:
     sdk: flutter
-  gesture_x_detector: ^0.0.5
+  gesture_x_detector: ^1.0.0
 
 dev_dependencies:
   flutter_test:
