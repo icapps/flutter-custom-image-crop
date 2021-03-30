@@ -101,14 +101,14 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   @override
   Widget build(BuildContext context) {
-    if (imageAsUIImage == null) {
+    final image = imageAsUIImage;
+    if (image == null) {
       return const Center(child: CircularProgressIndicator());
     }
     return LayoutBuilder(
       builder: (context, constraints) {
         width = constraints.maxWidth;
         height = constraints.maxHeight;
-        final image = imageAsUIImage!;
         final cropWidth = min(width, height) * widget.cropPercentage;
         final defaultScale = min(image.width, image.height) / cropWidth;
         final scale = data.scale * defaultScale;
