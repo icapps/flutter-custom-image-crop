@@ -27,11 +27,6 @@ The color above the image that will be cropped
 ### backgroundColor
 The color behind the image. This color will also be used when there are gaps/empty space after the cropping
 
-### path
-`Path path(double cropWidth, double width, double height)`
-
-A function that overrides the cropping path. Leave empty/null if you want to use a shape.
-
 ### shape
 path must be null
 

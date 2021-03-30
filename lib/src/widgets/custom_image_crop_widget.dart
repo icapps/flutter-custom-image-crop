@@ -17,7 +17,6 @@ class CustomImageCrop extends StatefulWidget {
   final CustomImageCropController cropController;
   final Color backgroundColor;
   final Color overlayColor;
-  final Path Function(double, double, double) path; // Custom crop path using cropwidth, width and height
   final CustomCropShape shape;
   final double cropPercentage;
   final CustomPaint Function(Path) drawPath;
@@ -29,8 +28,7 @@ class CustomImageCrop extends StatefulWidget {
   /// scale with buttons and sliders. This can also be
   /// achieved with gestures
   ///
-  /// Provide a `path`-function on how we should crop or use
-  /// a `shape` with `CustomCropShape.Circle` or
+  /// Use a `shape` with `CustomCropShape.Circle` or
   /// `CustomCropShape.Square`
   ///
   /// You can increase the cropping area using `cropPercentage`
@@ -45,7 +43,6 @@ class CustomImageCrop extends StatefulWidget {
     Key key,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.5),
     this.backgroundColor = Colors.white,
-    this.path,
     this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
@@ -110,7 +107,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
         final cropWidth = min(width, height) * widget.cropPercentage;
         final defaultScale = min(imageAsUIImage.width, imageAsUIImage.height) / cropWidth;
         final scale = data.scale * defaultScale;
-        path = getPath(cropWidth, width, height);
+        path = _getPath(cropWidth, width, height);
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
@@ -172,10 +169,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
-  Path getPath(double cropWidth, double width, double height) {
-    if (widget.path != null) {
-      return widget.path(cropWidth, width, height);
-    }
+  Path _getPath(double cropWidth, double width, double height) {
     switch (widget.shape) {
       case CustomCropShape.Circle:
         return Path()
@@ -207,7 +201,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     final canvas = Canvas(pictureRecorder);
     final defaultScale = min(imageAsUIImage.width, imageAsUIImage.height) / cropWidth;
     final scale = data.scale * defaultScale;
-    final clipPath = Path.from(getPath(cropWidth, cropWidth, cropWidth));
+    final clipPath = Path.from(_getPath(cropWidth, cropWidth, cropWidth));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 0))
       ..translate(data.x + cropWidth / 2, data.y + cropWidth / 2)
       ..scale(scale)
