@@ -4,8 +4,8 @@ class ResultScreen extends StatelessWidget {
   final MemoryImage image;
 
   const ResultScreen({
-    @required this.image,
-    Key key,
+    required this.image,
+    Key? key,
   }) : super(key: key);
 
   @override

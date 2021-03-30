@@ -15,7 +15,7 @@ You can provide the image using any Imageprovider.
 
 ## Parameters
 
-### @required image
+### required image
 The image that needs to be cropped
 
 ### cropController
@@ -69,7 +69,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   MyHomePage({
-    @required this.title,
+    required this.title,
     Key key,
   }) : super(key: key);
 

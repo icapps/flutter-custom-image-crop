@@ -38,14 +38,14 @@ class CustomImageCrop extends StatefulWidget {
   /// `DottedCropPathPainter.drawPath` and
   /// `SolidCropPathPainter.drawPath`
   const CustomImageCrop({
-    @required this.image,
-    @required this.cropController,
-    Key key,
+    required this.image,
+    required this.cropController,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.5),
     this.backgroundColor = Colors.white,
     this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -53,12 +53,12 @@ class CustomImageCrop extends StatefulWidget {
 }
 
 class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropListener {
-  CropImageData dataTransitionStart;
-  Path path;
-  double width, height;
-  ui.Image imageAsUIImage;
-  ImageStream _imageStream;
-  ImageStreamListener _imageListener;
+  CropImageData? dataTransitionStart;
+  late Path path;
+  late double width, height;
+  ui.Image? imageAsUIImage;
+  ImageStream? _imageStream;
+  ImageStreamListener? _imageListener;
 
   @override
   void initState() {
@@ -75,10 +75,12 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   void _getImage() {
     final oldImageStream = _imageStream;
     _imageStream = widget.image.resolve(createLocalImageConfiguration(context));
-    if (_imageStream.key != oldImageStream?.key) {
-      oldImageStream?.removeListener(_imageListener);
+    if (_imageStream?.key != oldImageStream?.key) {
+      if (_imageListener != null) {
+        oldImageStream?.removeListener(_imageListener!);
+      }
       _imageListener = ImageStreamListener(_updateImage);
-      _imageStream.addListener(_imageListener);
+      _imageStream?.addListener(_imageListener!);
     }
   }
 
@@ -90,7 +92,9 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   @override
   void dispose() {
-    _imageStream?.removeListener(_imageListener);
+    if (_imageListener != null) {
+      _imageStream?.removeListener(_imageListener!);
+    }
     widget.cropController.removeListener(this);
     super.dispose();
   }
@@ -105,7 +109,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
         width = constraints.maxWidth;
         height = constraints.maxHeight;
         final cropWidth = min(width, height) * widget.cropPercentage;
-        final defaultScale = min(imageAsUIImage.width, imageAsUIImage.height) / cropWidth;
+        final defaultScale = min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
         final scale = data.scale * defaultScale;
         path = _getPath(cropWidth, width, height);
         return XGestureDetector(
@@ -125,7 +129,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   child: Transform(
                     transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, 0))
                       ..rotateZ(data.angle)
-                      ..translate(-imageAsUIImage.width / 2, -imageAsUIImage.height / 2),
+                      ..translate(-imageAsUIImage!.width / 2, -imageAsUIImage!.height / 2),
                     child: Image(
                       image: widget.image,
                     ),
@@ -139,9 +143,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                     ),
                   ),
                 ),
-                if (widget.drawPath != null) ...{
-                  widget.drawPath(path),
-                },
+                widget.drawPath(path),
               ],
             ),
           ),
@@ -156,7 +158,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   void onScaleUpdate(ScaleEvent event) {
     if (dataTransitionStart != null) {
-      addTransition(dataTransitionStart - CropImageData(scale: event.scale, angle: event.rotationAngle));
+      addTransition(dataTransitionStart! - CropImageData(scale: event.scale, angle: event.rotationAngle));
     }
     dataTransitionStart = CropImageData(scale: event.scale, angle: event.rotationAngle);
   }
@@ -192,14 +194,14 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   }
 
   @override
-  Future<MemoryImage> onCropImage() async {
+  Future<MemoryImage?> onCropImage() async {
     if (imageAsUIImage == null) {
       return null;
     }
     final cropWidth = min(width, height) * widget.cropPercentage;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    final defaultScale = min(imageAsUIImage.width, imageAsUIImage.height) / cropWidth;
+    final defaultScale = min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
     final scale = data.scale * defaultScale;
     final clipPath = Path.from(_getPath(cropWidth, cropWidth, cropWidth));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 0))
@@ -214,7 +216,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     canvas.save();
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
-    canvas.drawImage(imageAsUIImage, Offset(-imageAsUIImage.width / 2, -imageAsUIImage.height / 2), imagePaint);
+    canvas.drawImage(imageAsUIImage!, Offset(-imageAsUIImage!.width / 2, -imageAsUIImage!.height / 2), imagePaint);
     canvas.restore();
 
     // Optionally remove magenta from image by evaluating every pixel
@@ -228,7 +230,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     // A workaround would be to save the image and load it inside of the isolate
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
 
-    return MemoryImage(bytes.buffer.asUint8List());
+    return bytes == null ? null : MemoryImage(bytes.buffer.asUint8List());
   }
 
   @override
