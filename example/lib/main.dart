@@ -61,7 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: CustomImageCrop(
               cropController: controller,
-              image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
+              // image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
+              image: const NetworkImage('https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
+              shape: CustomCropShape.Square,
             ),
           ),
           Row(
