@@ -1,4 +1,4 @@
-import 'package:custom_image_crop/src/model.dart';
+import 'package:custom_image_crop/src/models/model.dart';
 import 'package:flutter/material.dart';
 
 class CustomImageCropController {

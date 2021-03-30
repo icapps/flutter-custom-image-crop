@@ -1,7 +1,7 @@
 library custom_image_crop;
 
-export 'package:custom_image_crop/src/controller.dart';
-export 'package:custom_image_crop/src/custom_image_crop_widget.dart';
-export 'package:custom_image_crop/src/dotted_path_painter.dart';
-export 'package:custom_image_crop/src/solid_path_painter.dart';
-export 'package:custom_image_crop/src/model.dart';
+export 'package:custom_image_crop/src/controllers/controller.dart';
+export 'package:custom_image_crop/src/widgets/custom_image_crop_widget.dart';
+export 'package:custom_image_crop/src/painters/dotted_path_painter.dart';
+export 'package:custom_image_crop/src/painters/solid_path_painter.dart';
+export 'package:custom_image_crop/src/models/model.dart';
