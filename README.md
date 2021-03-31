@@ -6,7 +6,7 @@ An Image cropper that is customizable
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
 
-<img src="./example/screenshots/customimagecrop.gif" alt="customcropcircle" height="320"/> <img src="./example/screenshots/customcropsquare.png" alt="customcropsquare" height="320"/> <img src="./example/screenshots/customcropcircle.png" alt="customcropcircle" height="320"/>
+<img src="https://github.com/icapps/flutter-custom-image-crop/blob/main/example/screenshots/customimagecrop.gif?raw=true" alt="customcropcircle" height="320"/> <img src="https://github.com/icapps/flutter-custom-image-crop/blob/main/example/screenshots/customcropsquare.png?raw=true" alt="customcropsquare" height="320"/> <img src="https://github.com/icapps/flutter-custom-image-crop/blob/main/example/screenshots/customcropcircle.png?raw=true" alt="customcropcircle" height="320"/>
 
 # CustomImageCrop
 
