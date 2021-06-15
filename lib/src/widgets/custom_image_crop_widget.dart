@@ -207,9 +207,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     if(widget.shape == CustomCropShape.Circle){
       cropWidth = min(width, height) *  widget.cropPercentage;
       cropHeight = cropWidth;
-    }
-
-    if(widget.shape == CustomCropShape.Square){
+    } else if(widget.shape == CustomCropShape.Square){
       if(width<height){
         cropWidth = cropWidth * widget.cropPercentage;
         cropHeight = cropWidth / widget.aspectRatio;
@@ -236,7 +234,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     final scale = data.scale * defaultScale;
     final clipPath = Path.from(_getPath(cropWidth, cropHeight, cropWidth, cropHeight));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 0))
-      ..translate(data.x + cropWidth / 2, data.y + cropHeight/2)
+      ..translate(data.x + cropWidth / 2, data.y + cropHeight / 2)
       ..scale(scale)
       ..rotateZ(data.angle);
     final imagePaint = Paint()..isAntiAlias = false;
