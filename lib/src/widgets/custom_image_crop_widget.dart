@@ -56,7 +56,8 @@ class CustomImageCrop extends StatefulWidget {
   _CustomImageCropState createState() => _CustomImageCropState();
 }
 
-class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropListener {
+class _CustomImageCropState extends State<CustomImageCrop>
+    with CustomImageCropListener {
   CropImageData? dataTransitionStart;
   late Path path;
   late double width, height;
@@ -114,8 +115,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
         width = constraints.maxWidth;
         height = constraints.maxHeight;
         final sizeMap = _getCropSize(width, height);
-        final cropWidth = sizeMap['cropWidth']??0;
-        final cropHeight = sizeMap['cropHeight']??0;
+        final cropWidth = sizeMap['cropWidth'] ?? 0;
+        final cropHeight = sizeMap['cropHeight'] ?? 0;
         final defaultScale = min(image.width, image.height) / cropWidth;
         final scale = data.scale * defaultScale;
         path = _getPath(cropWidth, cropHeight, width, height);
@@ -134,9 +135,10 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   left: data.x + width / 2,
                   top: data.y + height / 2,
                   child: Transform(
-                    transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, 0))
-                      ..rotateZ(data.angle)
-                      ..translate(-image.width / 2, -image.height / 2),
+                    transform:
+                        Matrix4.diagonal3(vector_math.Vector3(scale, scale, 0))
+                          ..rotateZ(data.angle)
+                          ..translate(-image.width / 2, -image.height / 2),
                     child: Image(
                       image: widget.image,
                     ),
@@ -165,9 +167,13 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   void onScaleUpdate(ScaleEvent event) {
     if (dataTransitionStart != null) {
-      addTransition(dataTransitionStart! - CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0));
+      addTransition(dataTransitionStart! -
+          CropImageData(
+              scale: event.scale,
+              angle: widget.canRotate ? event.rotationAngle : 0));
     }
-    dataTransitionStart = CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0);
+    dataTransitionStart = CropImageData(
+        scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0);
   }
 
   void onMoveStart(_) {
@@ -178,7 +184,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
-  Path _getPath(double cropWidth, double cropHeight, double width, double height) {
+  Path _getPath(
+      double cropWidth, double cropHeight, double width, double height) {
     switch (widget.shape) {
       case CustomCropShape.Circle:
         return Path()
@@ -200,15 +207,15 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     }
   }
 
-  Map<String, double> _getCropSize(double width, double height){
+  Map<String, double> _getCropSize(double width, double height) {
     double cropWidth = width;
     double cropHeight = height;
-    
-    if(widget.shape == CustomCropShape.Circle){
-      cropWidth = min(width, height) *  widget.cropPercentage;
+
+    if (widget.shape == CustomCropShape.Circle) {
+      cropWidth = min(width, height) * widget.cropPercentage;
       cropHeight = cropWidth;
-    } else if(widget.shape == CustomCropShape.Square){
-      if(width<height){
+    } else if (widget.shape == CustomCropShape.Square) {
+      if (width < height) {
         cropWidth = cropWidth * widget.cropPercentage;
         cropHeight = cropWidth / widget.aspectRatio;
       } else {
@@ -230,9 +237,11 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     final cropHeight = sizeMap['cropHeight'] ?? 0;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    final defaultScale = min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
+    final defaultScale =
+        min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
     final scale = data.scale * defaultScale;
-    final clipPath = Path.from(_getPath(cropWidth, cropHeight, cropWidth, cropHeight));
+    final clipPath =
+        Path.from(_getPath(cropWidth, cropHeight, cropWidth, cropHeight));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 0))
       ..translate(data.x + cropWidth / 2, data.y + cropHeight / 2)
       ..scale(scale)
@@ -245,7 +254,10 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     canvas.save();
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
-    canvas.drawImage(imageAsUIImage!, Offset(-imageAsUIImage!.width / 2, -imageAsUIImage!.height / 2), imagePaint);
+    canvas.drawImage(
+        imageAsUIImage!,
+        Offset(-imageAsUIImage!.width / 2, -imageAsUIImage!.height / 2),
+        imagePaint);
     canvas.restore();
 
     // Optionally remove magenta from image by evaluating every pixel
@@ -254,7 +266,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     // final bytes = await compute(computeToByteData, <String, dynamic>{'pictureRecorder': pictureRecorder, 'cropWidth': cropWidth});
 
     ui.Picture picture = pictureRecorder.endRecording();
-    ui.Image image = await picture.toImage(cropWidth.floor(), cropHeight.floor());
+    ui.Image image =
+        await picture.toImage(cropWidth.floor(), cropHeight.floor());
     // Adding compute would be preferrable. Unfortunately we cannot pass an ui image to this.
     // A workaround would be to save the image and load it inside of the isolate
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
