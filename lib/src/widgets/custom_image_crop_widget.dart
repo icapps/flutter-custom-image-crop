@@ -165,9 +165,9 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   void onScaleUpdate(ScaleEvent event) {
     if (dataTransitionStart != null) {
-      addTransition(dataTransitionStart! - CropImageData(scale: event.scale, angle: widget.canRotate?event.rotationAngle:0));
+      addTransition(dataTransitionStart! - CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0));
     }
-    dataTransitionStart = CropImageData(scale: event.scale, angle: widget.canRotate?event.rotationAngle:0);
+    dataTransitionStart = CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0);
   }
 
   void onMoveStart(_) {
@@ -178,7 +178,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
-  Path _getPath(double cropWidth,double cropHeight, double width, double height) {
+  Path _getPath(double cropWidth, double cropHeight, double width, double height) {
     switch (widget.shape) {
       case CustomCropShape.Circle:
         return Path()
@@ -219,7 +219,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
       }
     }
 
-    return {'cropWidth':cropWidth,'cropHeight':cropHeight};
+    return {'cropWidth': cropWidth, 'cropHeight': cropHeight};
   }
 
   @override
@@ -228,8 +228,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
       return null;
     }
     final sizeMap = _getCropSize(width, height);
-    final cropWidth = sizeMap['cropWidth']??0;
-    final cropHeight = sizeMap['cropHeight']??0;
+    final cropWidth = sizeMap['cropWidth'] ?? 0;
+    final cropHeight = sizeMap['cropHeight'] ?? 0;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
     final defaultScale = min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
