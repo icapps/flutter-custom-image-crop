@@ -247,7 +247,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     canvas.transform(matrix4Image.storage);
     canvas.drawImage(imageAsUIImage!, Offset(-imageAsUIImage!.width / 2, -imageAsUIImage!.height / 2), imagePaint);
     canvas.restore();
-    
+
     // Optionally remove magenta from image by evaluating every pixel
     // See https://github.com/brendan-duncan/image/blob/master/lib/src/transform/copy_crop.dart
 
