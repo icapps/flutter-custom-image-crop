@@ -42,6 +42,12 @@ How big the crop should be in regards to the width and height available to the c
 ### drawPath
 How the border of the crop should be painted. default DottedCropPathPainter.drawPath and SolidCropPathPainter.drawPath are provided, but you can create/provide any CustomPaint.
 
+### canRotate
+Whether to allow the image to be rotated.
+
+### aspectRatio
+The ratio of width to height, effective only when shape is Square.
+
 # Controller Methods
 
 ## addTransition
