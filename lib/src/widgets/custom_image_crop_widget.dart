@@ -19,7 +19,7 @@ class CustomImageCrop extends StatefulWidget {
   final CustomCropShape shape;
   final double cropPercentage;
   final CustomPaint Function(Path) drawPath;
-  late final imagePaintDuringCrop;
+  late final Paint imagePaintDuringCrop;
 
   /// A custom image cropper widget
   ///
