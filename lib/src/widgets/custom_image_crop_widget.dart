@@ -48,11 +48,8 @@ class CustomImageCrop extends StatefulWidget {
     Paint? imagePaintDuringCrop,
     Key? key,
   }) : super(key: key) {
-    if (imagePaintDuringCrop == null) {
-      this.imagePaintDuringCrop = Paint()..filterQuality = FilterQuality.high;
-    } else {
-      this.imagePaintDuringCrop = imagePaintDuringCrop;
-    }
+    this.imagePaintDuringCrop =
+        imagePaintDuringCrop ?? (Paint()..filterQuality = FilterQuality.high);
   }
 
   @override
