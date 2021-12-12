@@ -13,7 +13,8 @@ class DottedCropPathPainter extends CustomPainter {
 
   DottedCropPathPainter(this._path);
 
-  static CustomPaint drawPath(Path path) => CustomPaint(painter: DottedCropPathPainter(path));
+  static CustomPaint drawPath(Path path) =>
+      CustomPaint(painter: DottedCropPathPainter(path));
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -33,5 +34,6 @@ class DottedCropPathPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant DottedCropPathPainter oldClipper) => oldClipper._path != _path;
+  bool shouldRepaint(covariant DottedCropPathPainter oldClipper) =>
+      oldClipper._path != _path;
 }
