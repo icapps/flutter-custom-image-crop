@@ -127,7 +127,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   left: data.x + width / 2,
                   top: data.y + height / 2,
                   child: Transform(
-                    transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, 0))
+                    transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, scale))
                       ..rotateZ(data.angle)
                       ..translate(-image.width / 2, -image.height / 2),
                     child: Image(
@@ -204,7 +204,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     final defaultScale = min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
     final scale = data.scale * defaultScale;
     final clipPath = Path.from(_getPath(cropWidth, cropWidth, cropWidth));
-    final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 0))
+    final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 1))
       ..translate(data.x + cropWidth / 2, data.y + cropWidth / 2)
       ..scale(scale)
       ..rotateZ(data.angle);
