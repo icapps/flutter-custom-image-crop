@@ -1,6 +1,6 @@
 name: custom_image_crop
 description: An image cropper that is customizable
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/icapps/flutter-custom-image-crop
 
 environment:
