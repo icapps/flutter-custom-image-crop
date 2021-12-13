@@ -19,7 +19,7 @@ class CustomImageCrop extends StatefulWidget {
   final CustomCropShape shape;
   final double cropPercentage;
   final CustomPaint Function(Path) drawPath;
-  late final Paint imagePaintDuringCrop;
+  final Paint imagePaintDuringCrop;
 
   /// A custom image cropper widget
   ///
@@ -47,10 +47,9 @@ class CustomImageCrop extends StatefulWidget {
     this.drawPath = DottedCropPathPainter.drawPath,
     Paint? imagePaintDuringCrop,
     Key? key,
-  }) : super(key: key) {
-    this.imagePaintDuringCrop =
-        imagePaintDuringCrop ?? (Paint()..filterQuality = FilterQuality.high);
-  }
+  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
+            (Paint()..filterQuality = FilterQuality.high),
+        super(key: key);
 
   @override
   _CustomImageCropState createState() => _CustomImageCropState();
