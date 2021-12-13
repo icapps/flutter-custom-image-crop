@@ -12,5 +12,6 @@ class InvertedClipper extends CustomClipper<Path> {
   Path getClip(Size size) => _path;
 
   @override
-  bool shouldReclip(covariant InvertedClipper oldClipper) => oldClipper._path != _path;
+  bool shouldReclip(covariant InvertedClipper oldClipper) =>
+      oldClipper._path != _path;
 }

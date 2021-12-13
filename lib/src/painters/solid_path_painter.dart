@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class SolidCropPathPainter extends CustomPainter {
@@ -13,11 +11,13 @@ class SolidCropPathPainter extends CustomPainter {
 
   SolidCropPathPainter(this._path);
 
-  static CustomPaint drawPath(Path path) => CustomPaint(painter: SolidCropPathPainter(path));
+  static CustomPaint drawPath(Path path) =>
+      CustomPaint(painter: SolidCropPathPainter(path));
 
   @override
   void paint(Canvas canvas, Size size) => canvas.drawPath(_path, _paint);
 
   @override
-  bool shouldRepaint(covariant SolidCropPathPainter oldPainter) => oldPainter._path != _path;
+  bool shouldRepaint(covariant SolidCropPathPainter oldPainter) =>
+      oldPainter._path != _path;
 }

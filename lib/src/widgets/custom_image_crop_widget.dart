@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
@@ -20,6 +19,7 @@ class CustomImageCrop extends StatefulWidget {
   final CustomCropShape shape;
   final double cropPercentage;
   final CustomPaint Function(Path) drawPath;
+  final Paint imagePaintDuringCrop;
 
   /// A custom image cropper widget
   ///
@@ -37,7 +37,7 @@ class CustomImageCrop extends StatefulWidget {
   /// we've provided two default painters as inspiration
   /// `DottedCropPathPainter.drawPath` and
   /// `SolidCropPathPainter.drawPath`
-  const CustomImageCrop({
+  CustomImageCrop({
     required this.image,
     required this.cropController,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.5),
@@ -45,14 +45,18 @@ class CustomImageCrop extends StatefulWidget {
     this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
+    Paint? imagePaintDuringCrop,
     Key? key,
-  }) : super(key: key);
+  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
+            (Paint()..filterQuality = FilterQuality.high),
+        super(key: key);
 
   @override
   _CustomImageCropState createState() => _CustomImageCropState();
 }
 
-class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropListener {
+class _CustomImageCropState extends State<CustomImageCrop>
+    with CustomImageCropListener {
   CropImageData? dataTransitionStart;
   late Path path;
   late double width, height;
@@ -110,7 +114,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
         width = constraints.maxWidth;
         height = constraints.maxHeight;
         final cropWidth = min(width, height) * widget.cropPercentage;
-        final defaultScale = min(image.width, image.height) / cropWidth;
+        final defaultScale = cropWidth / max(image.width, image.height);
         final scale = data.scale * defaultScale;
         path = _getPath(cropWidth, width, height);
         return XGestureDetector(
@@ -128,7 +132,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   left: data.x + width / 2,
                   top: data.y + height / 2,
                   child: Transform(
-                    transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, 0))
+                    transform: Matrix4.diagonal3(
+                        vector_math.Vector3(scale, scale, scale))
                       ..rotateZ(data.angle)
                       ..translate(-image.width / 2, -image.height / 2),
                     child: Image(
@@ -159,9 +164,11 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
   void onScaleUpdate(ScaleEvent event) {
     if (dataTransitionStart != null) {
-      addTransition(dataTransitionStart! - CropImageData(scale: event.scale, angle: event.rotationAngle));
+      addTransition(dataTransitionStart! -
+          CropImageData(scale: event.scale, angle: event.rotationAngle));
     }
-    dataTransitionStart = CropImageData(scale: event.scale, angle: event.rotationAngle);
+    dataTransitionStart =
+        CropImageData(scale: event.scale, angle: event.rotationAngle);
   }
 
   void onMoveStart(_) {
@@ -199,17 +206,20 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     if (imageAsUIImage == null) {
       return null;
     }
-    final cropWidth = min(width, height) * widget.cropPercentage;
+    final imageWidth = imageAsUIImage!.width;
+    final imageHeight = imageAsUIImage!.height;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    final defaultScale = min(imageAsUIImage!.width, imageAsUIImage!.height) / cropWidth;
-    final scale = data.scale * defaultScale;
+    final uiWidth = min(width, height) * widget.cropPercentage;
+    final cropWidth = max(imageWidth, imageHeight).toDouble();
+    final translateScale = cropWidth / uiWidth;
+    final scale = data.scale;
     final clipPath = Path.from(_getPath(cropWidth, cropWidth, cropWidth));
-    final matrix4Image = Matrix4.diagonal3(vector_math.Vector3(1, 1, 0))
-      ..translate(data.x + cropWidth / 2, data.y + cropWidth / 2)
+    final matrix4Image = Matrix4.diagonal3(vector_math.Vector3.all(1))
+      ..translate(translateScale * data.x + cropWidth / 2,
+          translateScale * data.y + cropWidth / 2)
       ..scale(scale)
       ..rotateZ(data.angle);
-    final imagePaint = Paint()..isAntiAlias = false;
     final bgPaint = Paint()
       ..color = widget.backgroundColor
       ..style = PaintingStyle.fill;
@@ -217,7 +227,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     canvas.save();
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
-    canvas.drawImage(imageAsUIImage!, Offset(-imageAsUIImage!.width / 2, -imageAsUIImage!.height / 2), imagePaint);
+    canvas.drawImage(imageAsUIImage!, Offset(-imageWidth / 2, -imageHeight / 2),
+        widget.imagePaintDuringCrop);
     canvas.restore();
 
     // Optionally remove magenta from image by evaluating every pixel
@@ -226,11 +237,12 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     // final bytes = await compute(computeToByteData, <String, dynamic>{'pictureRecorder': pictureRecorder, 'cropWidth': cropWidth});
 
     ui.Picture picture = pictureRecorder.endRecording();
-    ui.Image image = await picture.toImage(cropWidth.floor(), cropWidth.floor());
+    ui.Image image =
+        await picture.toImage(cropWidth.floor(), cropWidth.floor());
+
     // Adding compute would be preferrable. Unfortunately we cannot pass an ui image to this.
     // A workaround would be to save the image and load it inside of the isolate
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-
     return bytes == null ? null : MemoryImage(bytes.buffer.asUint8List());
   }
 
