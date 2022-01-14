@@ -10,7 +10,9 @@ addons:
       - fonts-droid-fallback
 
 before_install:
-  - chmod +x ./tool/test.sh
+  - chmod +x ./tool/travis/test.sh
+  - chmod +x ./tool/travis/analyze.sh
+  - chmod +x ./tool/travis/format.sh
 
 sudo: required
 
