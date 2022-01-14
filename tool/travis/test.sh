@@ -13,15 +13,6 @@ echo "===="
 
 echo ""
 echo "===="
-echo "Start filtering tests"
-echo "===="
-dart run ./coverage/filter_test_coverage.dart || exit -1;
-echo "===="
-echo "Finished filtering tests"
-echo "===="
-
-echo ""
-echo "===="
 echo "Start coveralls upload"
 echo "===="
 coveralls-lcov coverage/lcov.info
