@@ -1,6 +1,6 @@
 import 'dart:io';
 
-const packageName = 'flutter_template';
+const packageName = 'custom_image_crop';
 
 void main() {
   Logger.debug('====');
