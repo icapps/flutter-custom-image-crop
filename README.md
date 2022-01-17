@@ -3,8 +3,9 @@
 An Image cropper that is customizable
 
 [![pub package](https://img.shields.io/pub/v/custom_image_crop.svg)](https://pub.dartlang.org/packages/custom_image_crop)
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 [![Build Status](https://app.travis-ci.com/icapps/flutter-custom-image-crop.svg?branch=main)](https://app.travis-ci.com/icapps/flutter-custom-image-crop)
+[![Coverage Status](https://coveralls.io/repos/github/icapps/flutter-custom-image-crop/badge.svg?branch=main)](https://coveralls.io/github/icapps/flutter-custom-image-crop?branch=main)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
 <img src="https://github.com/icapps/flutter-custom-image-crop/blob/main/example/screenshots/customimagecrop.gif?raw=true" alt="customcropcircle" height="320"/> <img src="https://github.com/icapps/flutter-custom-image-crop/blob/main/example/screenshots/customcropsquare.png?raw=true" alt="customcropsquare" height="320"/> <img src="https://github.com/icapps/flutter-custom-image-crop/blob/main/example/screenshots/customcropcircle.png?raw=true" alt="customcropcircle" height="320"/>
 
