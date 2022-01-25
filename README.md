@@ -13,9 +13,9 @@ An Image cropper that is customizable
 
 ```
 CustomImageCrop(
-              cropController: controller,
-              image: const AssetImage('assets/test.png'),
-            ),
+  cropController: controller,
+  image: const AssetImage('assets/test.png'),
+),
 ```
 
 You can provide the image using any Imageprovider.

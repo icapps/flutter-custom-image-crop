@@ -1,3 +1,7 @@
+## [0.0.4] - 25/01/2021
+
+* Added documentation
+
 ## [0.0.3] - 13/12/2021
 
 * Fixed issue where cropped image's size depends on screen size used
