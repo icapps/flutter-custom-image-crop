@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 
+/// Draw a dotted path around the given path
 class DottedCropPathPainter extends CustomPainter {
-  static const dashWidth = 10.0;
-  static const dashSpace = 5.0;
-  static const strokeWidth = 4.0;
+  static const _dashWidth = 10.0;
+  static const _dashSpace = 5.0;
+  static const _strokeWidth = 4.0;
   final Path _path;
   final _paint = Paint()
     ..color = Colors.white
-    ..strokeWidth = strokeWidth
+    ..strokeWidth = _strokeWidth
     ..style = PaintingStyle.stroke
     ..strokeJoin = StrokeJoin.round;
 
+  /// Draw a dotted path around the given path
   DottedCropPathPainter(this._path);
 
+  /// Return a CustomPaint widget with the current CustomPainter
   static CustomPaint drawPath(Path path) =>
       CustomPaint(painter: DottedCropPathPainter(path));
 
@@ -23,11 +26,11 @@ class DottedCropPathPainter extends CustomPainter {
     for (final pathMetric in _path.computeMetrics()) {
       while (distance < pathMetric.length) {
         dashPath.addPath(
-          pathMetric.extractPath(distance, distance + dashWidth),
+          pathMetric.extractPath(distance, distance + _dashWidth),
           Offset.zero,
         );
-        distance += dashWidth;
-        distance += dashSpace;
+        distance += _dashWidth;
+        distance += _dashSpace;
       }
     }
     canvas.drawPath(dashPath, _paint);

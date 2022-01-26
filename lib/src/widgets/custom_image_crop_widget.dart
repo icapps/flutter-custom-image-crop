@@ -11,14 +11,36 @@ import 'package:custom_image_crop/src/painters/dotted_path_painter.dart';
 import 'package:custom_image_crop/src/clippers/inverted_clipper.dart';
 import 'package:custom_image_crop/src/models/model.dart';
 
+/// An image cropper that is customizable.
+/// You can rotate, scale and translate either
+/// through gestures or a controller
 class CustomImageCrop extends StatefulWidget {
+  /// The image to crop
   final ImageProvider image;
+
+  /// The controller that handles the cropping and
+  /// changing of the cropping area
   final CustomImageCropController cropController;
+
+  /// The color behind the cropping area
   final Color backgroundColor;
+
+  /// The color in front of the cropped area
   final Color overlayColor;
+
+  /// The shape of the cropping area
   final CustomCropShape shape;
+
+  /// The percentage of the available area that is
+  /// reserved for the cropping area
   final double cropPercentage;
+
+  /// The path drawer of the border see [DottedCropPathPainter],
+  /// [SolidPathPainter] for more details or how to implement a
+  /// custom one
   final CustomPaint Function(Path) drawPath;
+
+  /// The paint used when drawing an image before cropping
   final Paint imagePaintDuringCrop;
 
   /// A custom image cropper widget
@@ -57,10 +79,10 @@ class CustomImageCrop extends StatefulWidget {
 
 class _CustomImageCropState extends State<CustomImageCrop>
     with CustomImageCropListener {
-  CropImageData? dataTransitionStart;
-  late Path path;
-  late double width, height;
-  ui.Image? imageAsUIImage;
+  CropImageData? _dataTransitionStart;
+  late Path _path;
+  late double _width, _height;
+  ui.Image? _imageAsUIImage;
   ImageStream? _imageStream;
   ImageStreamListener? _imageListener;
 
@@ -90,7 +112,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   void _updateImage(ImageInfo imageInfo, _) {
     setState(() {
-      imageAsUIImage = imageInfo.image;
+      _imageAsUIImage = imageInfo.image;
     });
   }
 
@@ -105,32 +127,32 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   @override
   Widget build(BuildContext context) {
-    final image = imageAsUIImage;
+    final image = _imageAsUIImage;
     if (image == null) {
       return const Center(child: CircularProgressIndicator());
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        width = constraints.maxWidth;
-        height = constraints.maxHeight;
-        final cropWidth = min(width, height) * widget.cropPercentage;
+        _width = constraints.maxWidth;
+        _height = constraints.maxHeight;
+        final cropWidth = min(_width, _height) * widget.cropPercentage;
         final defaultScale = cropWidth / max(image.width, image.height);
         final scale = data.scale * defaultScale;
-        path = _getPath(cropWidth, width, height);
+        _path = _getPath(cropWidth, _width, _height);
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
           onScaleStart: onScaleStart,
           onScaleUpdate: onScaleUpdate,
           child: Container(
-            width: width,
-            height: height,
+            width: _width,
+            height: _height,
             color: widget.backgroundColor,
             child: Stack(
               children: [
                 Positioned(
-                  left: data.x + width / 2,
-                  top: data.y + height / 2,
+                  left: data.x + _width / 2,
+                  top: data.y + _height / 2,
                   child: Transform(
                     transform: Matrix4.diagonal3(
                         vector_math.Vector3(scale, scale, scale))
@@ -143,13 +165,13 @@ class _CustomImageCropState extends State<CustomImageCrop>
                 ),
                 IgnorePointer(
                   child: ClipPath(
-                    clipper: InvertedClipper(path, width, height),
+                    clipper: InvertedClipper(_path, _width, _height),
                     child: Container(
                       color: widget.overlayColor,
                     ),
                   ),
                 ),
-                widget.drawPath(path),
+                widget.drawPath(_path),
               ],
             ),
           ),
@@ -159,20 +181,20 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onScaleStart(_) {
-    dataTransitionStart = null; // Reset for update
+    _dataTransitionStart = null; // Reset for update
   }
 
   void onScaleUpdate(ScaleEvent event) {
-    if (dataTransitionStart != null) {
-      addTransition(dataTransitionStart! -
+    if (_dataTransitionStart != null) {
+      addTransition(_dataTransitionStart! -
           CropImageData(scale: event.scale, angle: event.rotationAngle));
     }
-    dataTransitionStart =
+    _dataTransitionStart =
         CropImageData(scale: event.scale, angle: event.rotationAngle);
   }
 
   void onMoveStart(_) {
-    dataTransitionStart = null; // Reset for update
+    _dataTransitionStart = null; // Reset for update
   }
 
   void onMoveUpdate(MoveEvent event) {
@@ -203,14 +225,14 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   @override
   Future<MemoryImage?> onCropImage() async {
-    if (imageAsUIImage == null) {
+    if (_imageAsUIImage == null) {
       return null;
     }
-    final imageWidth = imageAsUIImage!.width;
-    final imageHeight = imageAsUIImage!.height;
+    final imageWidth = _imageAsUIImage!.width;
+    final imageHeight = _imageAsUIImage!.height;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    final uiWidth = min(width, height) * widget.cropPercentage;
+    final uiWidth = min(_width, _height) * widget.cropPercentage;
     final cropWidth = max(imageWidth, imageHeight).toDouble();
     final translateScale = cropWidth / uiWidth;
     final scale = data.scale;
@@ -227,8 +249,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
     canvas.save();
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
-    canvas.drawImage(imageAsUIImage!, Offset(-imageWidth / 2, -imageHeight / 2),
-        widget.imagePaintDuringCrop);
+    canvas.drawImage(_imageAsUIImage!,
+        Offset(-imageWidth / 2, -imageHeight / 2), widget.imagePaintDuringCrop);
     canvas.restore();
 
     // Optionally remove magenta from image by evaluating every pixel
