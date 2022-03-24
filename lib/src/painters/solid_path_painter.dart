@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Draw a solid path around the given path
 class SolidCropPathPainter extends CustomPainter {
-  static const _strokeWidth = 4.0;
+  static const _strokeWidth = 0.0;
   final Path _path;
   final _paint = Paint()
-    ..color = Colors.white
+    ..color = Colors.transparent
     ..strokeWidth = _strokeWidth
     ..style = PaintingStyle.stroke
     ..strokeJoin = StrokeJoin.round;

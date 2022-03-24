@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 
 import 'package:custom_image_crop/src/controllers/controller.dart';
@@ -86,6 +87,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
   ImageStream? _imageStream;
   ImageStreamListener? _imageListener;
 
+  int buildCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -127,6 +130,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   @override
   Widget build(BuildContext context) {
+    //! TODO: optimization required
+    print('buildCount: ${++buildCount}');
     final image = _imageAsUIImage;
     if (image == null) {
       return const Center(child: CircularProgressIndicator());
@@ -158,16 +163,58 @@ class _CustomImageCropState extends State<CustomImageCrop>
                         vector_math.Vector3(scale, scale, scale))
                       ..rotateZ(data.angle)
                       ..translate(-image.width / 2, -image.height / 2),
-                    child: Image(
-                      image: widget.image,
+                    child: Stack(
+                      children: [
+                        Image(image: widget.image),
+                        BackdropFilter(
+                          filter: ui.ImageFilter.blur(sigmaX: 250, sigmaY: 250),
+                          child: Container(
+                            color: Colors.black12,
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                          ),
+                        ),
+                        Image(
+                          image: widget.image,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Center(
+                  child: ClipOval(
+                    clipper: CircleClipper(
+                      width: _width * widget.cropPercentage,
+                      height: _width * widget.cropPercentage,
+                    ),
+                    child: Container(
+                      width: _width * widget.cropPercentage,
+                      height: _width * widget.cropPercentage,
+                      child: GridView.builder(
+                        itemCount: 9,
+                        shrinkWrap: true,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3),
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext context, int index) =>
+                            Container(
+                          decoration: BoxDecoration(
+                            border: getBorder(index, color: Colors.white54),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 IgnorePointer(
                   child: ClipPath(
                     clipper: InvertedClipper(_path, _width, _height),
-                    child: Container(
-                      color: widget.overlayColor,
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                      child: Container(
+                        color: widget.overlayColor,
+                      ),
                     ),
                   ),
                 ),
@@ -178,6 +225,38 @@ class _CustomImageCropState extends State<CustomImageCrop>
         );
       },
     );
+  }
+
+  Border getBorder(int index,
+      {Color color = Colors.white, double width = 0.5}) {
+    switch (index) {
+      case 1:
+        return Border(
+            left: BorderSide(color: color, width: width),
+            right: BorderSide(color: color, width: width),
+            bottom: BorderSide(color: color, width: width));
+
+      case 3:
+        return Border(
+            top: BorderSide(color: color, width: width),
+            right: BorderSide(color: color, width: width),
+            bottom: BorderSide(color: color, width: width));
+
+      case 5:
+        return Border(
+            left: BorderSide(color: color, width: width),
+            top: BorderSide(color: color, width: width),
+            bottom: BorderSide(color: color, width: width));
+
+      case 7:
+        return Border(
+            left: BorderSide(color: color, width: width),
+            right: BorderSide(color: color, width: width),
+            top: BorderSide(color: color, width: width));
+
+      default:
+        return Border.all(color: color, width: width);
+    }
   }
 
   void onScaleStart(_) {
@@ -223,6 +302,16 @@ class _CustomImageCropState extends State<CustomImageCrop>
     }
   }
 
+  // Calculate dominant color from ImageProvider
+  Future<List<Color>> getImagePalette(ImageProvider imageProvider) async {
+    final PaletteGenerator paletteGenerator =
+        await PaletteGenerator.fromImageProvider(imageProvider);
+    return [
+      paletteGenerator.dominantColor!.color,
+      paletteGenerator.lightVibrantColor!.color
+    ];
+  }
+
   @override
   Future<MemoryImage?> onCropImage() async {
     if (_imageAsUIImage == null) {
@@ -243,7 +332,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
       ..scale(scale)
       ..rotateZ(data.angle);
     final bgPaint = Paint()
-      ..color = widget.backgroundColor
+      ..color = Colors.transparent
       ..style = PaintingStyle.fill;
     canvas.drawRect(Rect.fromLTWH(0, 0, cropWidth, cropWidth), bgPaint);
     canvas.save();

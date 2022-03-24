@@ -17,3 +17,19 @@ class InvertedClipper extends CustomClipper<Path> {
   bool shouldReclip(covariant InvertedClipper oldClipper) =>
       oldClipper._path != _path;
 }
+
+class CircleClipper extends CustomClipper<Rect> {
+  final double width;
+  final double height;
+
+  CircleClipper({required this.width, required this.height});
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTWH(0, 0, width, height);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
+    return false;
+  }
+}
