@@ -5,6 +5,7 @@ class DottedCropPathPainter extends CustomPainter {
   static const _dashWidth = 10.0;
   static const _dashSpace = 5.0;
   static const _strokeWidth = 4.0;
+  Color outlineColor;
   final Path _path;
   final _paint = Paint()
     ..color = Colors.white
@@ -13,14 +14,16 @@ class DottedCropPathPainter extends CustomPainter {
     ..strokeJoin = StrokeJoin.round;
 
   /// Draw a dotted path around the given path
-  DottedCropPathPainter(this._path);
+  //DottedCropPathPainter(this._path);
+  DottedCropPathPainter(this._path, this.outlineColor);
 
   /// Return a CustomPaint widget with the current CustomPainter
-  static CustomPaint drawPath(Path path) =>
-      CustomPaint(painter: DottedCropPathPainter(path));
+  static CustomPaint drawPath(Path path, Color borderColor) =>
+      CustomPaint(painter: DottedCropPathPainter(path, borderColor));
 
   @override
   void paint(Canvas canvas, Size size) {
+    _paint.color = outlineColor;
     final dashPath = Path();
     var distance = 0.0;
     for (final pathMetric in _path.computeMetrics()) {

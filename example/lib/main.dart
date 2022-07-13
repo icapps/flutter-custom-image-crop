@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -63,11 +64,15 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Expanded(
             child: CustomImageCrop(
+              blur: 20,
+              blurColor: Colors.black,
+              outlineColor: Colors.blue,
+              drawPath: SolidCropPathPainter.drawPath,
               cropController: controller,
               // image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
               image: const NetworkImage(
                   'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
-              shape: CustomCropShape.Square,
+              shape: CustomCropShape.Circle,
             ),
           ),
           Row(
