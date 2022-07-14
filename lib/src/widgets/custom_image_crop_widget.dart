@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
@@ -38,10 +39,19 @@ class CustomImageCrop extends StatefulWidget {
   /// The path drawer of the border see [DottedCropPathPainter],
   /// [SolidPathPainter] for more details or how to implement a
   /// custom one
-  final CustomPaint Function(Path) drawPath;
+  final CustomPaint Function(Path, Color) drawPath;
 
   /// The paint used when drawing an image before cropping
   final Paint imagePaintDuringCrop;
+
+  /// Sets the blur effect strength
+  final double? blur;
+
+  /// Sets the color of the blur effect
+  final Color? blurColor;
+
+  /// Sets the color of the outline of the crop selection area
+  Color? outlineColor = Colors.white;
 
   /// A custom image cropper widget
   ///
@@ -67,6 +77,9 @@ class CustomImageCrop extends StatefulWidget {
     this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
+    this.blur,
+    this.blurColor,
+    this.outlineColor,
     Paint? imagePaintDuringCrop,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
@@ -166,12 +179,16 @@ class _CustomImageCropState extends State<CustomImageCrop>
                 IgnorePointer(
                   child: ClipPath(
                     clipper: InvertedClipper(_path, _width, _height),
-                    child: Container(
-                      color: widget.overlayColor,
+                    child: Blur(
+                      blur: widget.blur ?? 0,
+                      blurColor: widget.blurColor ?? Colors.transparent,
+                      child: Container(
+                        color: widget.overlayColor,
+                      ),
                     ),
                   ),
                 ),
-                widget.drawPath(_path),
+                widget.drawPath(_path, widget.outlineColor ?? Colors.white),
               ],
             ),
           ),
