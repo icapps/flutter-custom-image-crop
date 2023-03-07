@@ -40,6 +40,9 @@ class CustomImageCrop extends StatefulWidget {
   /// custom one
   final CustomPaint Function(Path) drawPath;
 
+  /// Whether to allow the image to be rotated.
+  final bool canRotate;
+
   /// The paint used when drawing an image before cropping
   final Paint imagePaintDuringCrop;
 
@@ -67,6 +70,7 @@ class CustomImageCrop extends StatefulWidget {
     this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
+    this.canRotate = false,
     Paint? imagePaintDuringCrop,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
@@ -187,10 +191,10 @@ class _CustomImageCropState extends State<CustomImageCrop>
   void onScaleUpdate(ScaleEvent event) {
     if (_dataTransitionStart != null) {
       addTransition(_dataTransitionStart! -
-          CropImageData(scale: event.scale, angle: event.rotationAngle));
+          CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0));
     }
     _dataTransitionStart =
-        CropImageData(scale: event.scale, angle: event.rotationAngle);
+        CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0);
   }
 
   void onMoveStart(_) {
