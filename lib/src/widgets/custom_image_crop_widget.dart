@@ -46,6 +46,9 @@ class CustomImageCrop extends StatefulWidget {
   /// The paint used when drawing an image before cropping
   final Paint imagePaintDuringCrop;
 
+  /// This widget is used to specify a custom progress indicator
+  final Widget? customProgressIndicator;
+
   /// A custom image cropper widget
   ///
   /// Uses a `CustomImageCropController` to crop the image.
@@ -71,6 +74,7 @@ class CustomImageCrop extends StatefulWidget {
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
     this.canRotate = false,
+    this.customProgressIndicator,
     Paint? imagePaintDuringCrop,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
@@ -133,7 +137,9 @@ class _CustomImageCropState extends State<CustomImageCrop>
   Widget build(BuildContext context) {
     final image = _imageAsUIImage;
     if (image == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: widget.customProgressIndicator ?? CircularProgressIndicator(),
+      );
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -191,10 +197,12 @@ class _CustomImageCropState extends State<CustomImageCrop>
   void onScaleUpdate(ScaleEvent event) {
     if (_dataTransitionStart != null) {
       addTransition(_dataTransitionStart! -
-          CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0));
+          CropImageData(
+              scale: event.scale,
+              angle: widget.canRotate ? event.rotationAngle : 0));
     }
-    _dataTransitionStart =
-        CropImageData(scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0);
+    _dataTransitionStart = CropImageData(
+        scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0);
   }
 
   void onMoveStart(_) {

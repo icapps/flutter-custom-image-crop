@@ -46,6 +46,9 @@ How the border of the crop should be painted. default DottedCropPathPainter.draw
 ### canRotate
 Whether to allow the image to be rotated.
 
+### customProgressIndicator
+Custom widget for progress indicator.
+
 # Controller Methods
 
 ## addTransition
