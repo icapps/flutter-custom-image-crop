@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:custom_image_crop/custom_image_crop.dart';
 import 'package:example/result_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -68,6 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
               image: const NetworkImage(
                   'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
               shape: CustomCropShape.Square,
+              canRotate: true,
+              disableGestureMove: false,
+              disableGestureScale: false,
+              customProgressIndicator: const CupertinoActivityIndicator(),
             ),
           ),
           Row(

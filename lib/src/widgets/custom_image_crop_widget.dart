@@ -43,6 +43,18 @@ class CustomImageCrop extends StatefulWidget {
   /// Whether to allow the image to be rotated.
   final bool canRotate;
 
+  /// Determines whether gesture gesture scaling is disabled.
+  ///
+  /// By default, scaling is enabled. Set [disableScale] to `true`
+  /// to disable scaling, which can be useful for loading
+  final bool disableGestureScale;
+
+  /// Determines whether moving gesture overlay is disabled.
+  ///
+  /// By default, moving is enabled. Set [disableMove] to `true`
+  /// to disable move, which can be useful for loading
+  final bool disableGestureMove;
+
   /// The paint used when drawing an image before cropping
   final Paint imagePaintDuringCrop;
 
@@ -73,7 +85,9 @@ class CustomImageCrop extends StatefulWidget {
     this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
-    this.canRotate = false,
+    this.canRotate = true,
+    this.disableGestureScale = false,
+    this.disableGestureMove = false,
     this.customProgressIndicator,
     Paint? imagePaintDuringCrop,
     Key? key,
@@ -195,14 +209,21 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onScaleUpdate(ScaleEvent event) {
+    if (widget.disableGestureScale) return;
+
     if (_dataTransitionStart != null) {
-      addTransition(_dataTransitionStart! -
-          CropImageData(
+      addTransition(
+        _dataTransitionStart! -
+            CropImageData(
               scale: event.scale,
-              angle: widget.canRotate ? event.rotationAngle : 0));
+              angle: widget.canRotate ? event.rotationAngle : 0,
+            ),
+      );
     }
     _dataTransitionStart = CropImageData(
-        scale: event.scale, angle: widget.canRotate ? event.rotationAngle : 0);
+      scale: event.scale,
+      angle: widget.canRotate ? event.rotationAngle : 0,
+    );
   }
 
   void onMoveStart(_) {
@@ -210,6 +231,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onMoveUpdate(MoveEvent event) {
+    if (widget.disableGestureMove) return;
+
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
