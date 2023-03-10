@@ -43,7 +43,7 @@ class CustomImageCrop extends StatefulWidget {
   /// Whether to allow the image to be rotated.
   final bool canRotate;
 
-  /// Determines whether gesture gesture scaling is disabled.
+  /// Determines whether scaling gesture is disabled.
   ///
   /// By default, scaling is enabled. Set [disableScale] to `true`
   /// to disable scaling, which can be useful for loading
@@ -209,20 +209,22 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onScaleUpdate(ScaleEvent event) {
-    if (widget.disableGestureScale) return;
+    final scale = widget.disableGestureScale
+        ? (_dataTransitionStart?.scale ?? 1.0)
+        : event.scale;
 
     if (_dataTransitionStart != null) {
       addTransition(
         _dataTransitionStart! -
             CropImageData(
-              scale: event.scale,
-              angle: widget.canRotate ? event.rotationAngle : 0,
+              scale: scale,
+              angle: widget.canRotate ? event.rotationAngle : 0.0,
             ),
       );
     }
     _dataTransitionStart = CropImageData(
-      scale: event.scale,
-      angle: widget.canRotate ? event.rotationAngle : 0,
+      scale: scale,
+      angle: widget.canRotate ? event.rotationAngle : 0.0,
     );
   }
 
