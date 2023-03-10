@@ -213,18 +213,20 @@ class _CustomImageCropState extends State<CustomImageCrop>
         ? (_dataTransitionStart?.scale ?? 1.0)
         : event.scale;
 
+    final angle = widget.canRotate ? event.rotationAngle : 0.0;
+
     if (_dataTransitionStart != null) {
       addTransition(
         _dataTransitionStart! -
             CropImageData(
               scale: scale,
-              angle: widget.canRotate ? event.rotationAngle : 0.0,
+              angle: angle,
             ),
       );
     }
     _dataTransitionStart = CropImageData(
       scale: scale,
-      angle: widget.canRotate ? event.rotationAngle : 0.0,
+      angle: angle,
     );
   }
 
