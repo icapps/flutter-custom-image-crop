@@ -45,15 +45,15 @@ class CustomImageCrop extends StatefulWidget {
 
   /// Determines whether scaling gesture is disabled.
   ///
-  /// By default, scaling is enabled. Set [disableScale] to `true`
-  /// to disable scaling, which can be useful for loading
-  final bool disableGestureScale;
+  /// By default, scaling is enabled.
+  /// Set [canScale] to `false` to disable scaling.
+  final bool canScale;
 
   /// Determines whether moving gesture overlay is disabled.
   ///
-  /// By default, moving is enabled. Set [disableMove] to `true`
-  /// to disable move, which can be useful for loading
-  final bool disableGestureMove;
+  /// By default, moving is enabled.
+  /// Set [canMove] to `false` to disable move.
+  final bool canMove;
 
   /// The paint used when drawing an image before cropping
   final Paint imagePaintDuringCrop;
@@ -86,8 +86,8 @@ class CustomImageCrop extends StatefulWidget {
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
     this.canRotate = true,
-    this.disableGestureScale = false,
-    this.disableGestureMove = false,
+    this.canScale = true,
+    this.canMove = true,
     this.customProgressIndicator,
     Paint? imagePaintDuringCrop,
     Key? key,
@@ -209,9 +209,9 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onScaleUpdate(ScaleEvent event) {
-    final scale = widget.disableGestureScale
-        ? (_dataTransitionStart?.scale ?? 1.0)
-        : event.scale;
+    final scale = widget.canScale
+        ? event.scale
+        : (_dataTransitionStart?.scale ?? 1.0);
 
     final angle = widget.canRotate ? event.rotationAngle : 0.0;
 
@@ -235,7 +235,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onMoveUpdate(MoveEvent event) {
-    if (widget.disableGestureMove) return;
+    if (!widget.canMove) return;
 
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
