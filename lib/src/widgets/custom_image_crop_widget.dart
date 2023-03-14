@@ -209,9 +209,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onScaleUpdate(ScaleEvent event) {
-    final scale = widget.canScale
-        ? event.scale
-        : (_dataTransitionStart?.scale ?? 1.0);
+    final scale =
+        widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
 
     final angle = widget.canRotate ? event.rotationAngle : 0.0;
 
