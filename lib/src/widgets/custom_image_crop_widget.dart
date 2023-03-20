@@ -40,8 +40,26 @@ class CustomImageCrop extends StatefulWidget {
   /// custom one
   final CustomPaint Function(Path) drawPath;
 
+  /// Whether to allow the image to be rotated.
+  final bool canRotate;
+
+  /// Determines whether scaling gesture is disabled.
+  ///
+  /// By default, scaling is enabled.
+  /// Set [canScale] to `false` to disable scaling.
+  final bool canScale;
+
+  /// Determines whether moving gesture overlay is disabled.
+  ///
+  /// By default, moving is enabled.
+  /// Set [canMove] to `false` to disable move.
+  final bool canMove;
+
   /// The paint used when drawing an image before cropping
   final Paint imagePaintDuringCrop;
+
+  /// This widget is used to specify a custom progress indicator
+  final Widget? customProgressIndicator;
 
   /// A custom image cropper widget
   ///
@@ -67,6 +85,10 @@ class CustomImageCrop extends StatefulWidget {
     this.shape = CustomCropShape.Circle,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
+    this.canRotate = true,
+    this.canScale = true,
+    this.canMove = true,
+    this.customProgressIndicator,
     Paint? imagePaintDuringCrop,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
@@ -129,7 +151,9 @@ class _CustomImageCropState extends State<CustomImageCrop>
   Widget build(BuildContext context) {
     final image = _imageAsUIImage;
     if (image == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: widget.customProgressIndicator ?? CircularProgressIndicator(),
+      );
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -185,12 +209,24 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onScaleUpdate(ScaleEvent event) {
+    final scale =
+        widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
+
+    final angle = widget.canRotate ? event.rotationAngle : 0.0;
+
     if (_dataTransitionStart != null) {
-      addTransition(_dataTransitionStart! -
-          CropImageData(scale: event.scale, angle: event.rotationAngle));
+      addTransition(
+        _dataTransitionStart! -
+            CropImageData(
+              scale: scale,
+              angle: angle,
+            ),
+      );
     }
-    _dataTransitionStart =
-        CropImageData(scale: event.scale, angle: event.rotationAngle);
+    _dataTransitionStart = CropImageData(
+      scale: scale,
+      angle: angle,
+    );
   }
 
   void onMoveStart(_) {
@@ -198,6 +234,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onMoveUpdate(MoveEvent event) {
+    if (!widget.canMove) return;
+
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
