@@ -16,20 +16,20 @@ CropFitParams calculateCropParams({
   switch (imageFit) {
     case CustomImageFit.fitCropSpace:
       final cropSize = min(screenWidth, screenHeight);
-      final cropSizeToPaint = cropSize;
+      final cropSizeToPaint = cropSize * cropPercentage;
       final defaultScale = (cropSize * cropPercentage) / max(imageWidth, imageHeight);
 
       return CropFitParams(cropSize, cropSizeToPaint, defaultScale);
 
     case CustomImageFit.fillCropWidth:
       final cropSize = screenWidth;
-      final cropSizeToPaint = cropSize;
+      final cropSizeToPaint = cropSize * cropPercentage;
       final defaultScale = (cropSize * cropPercentage) / imageWidth;
 
       return CropFitParams(cropSize, cropSizeToPaint, defaultScale);
     case CustomImageFit.fillCropHeight:
       final cropSize = screenHeight;
-      final cropSizeToPaint = cropSize;
+      final cropSizeToPaint = cropSize * cropPercentage;
       final defaultScale = (cropSize * cropPercentage) / imageHeight;
 
       return CropFitParams(cropSize, cropSizeToPaint, defaultScale);
