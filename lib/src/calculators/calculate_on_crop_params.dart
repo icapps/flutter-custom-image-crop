@@ -1,4 +1,7 @@
-part of 'package:custom_image_crop/src/widgets/custom_image_crop_widget.dart';
+import 'dart:math';
+
+import 'package:custom_image_crop/src/models/params_model.dart';
+import 'package:custom_image_crop/src/widgets/custom_image_crop_widget.dart';
 
 /// Returns params to use for cropping image.
 OnCropParams caclulateOnCropParams({

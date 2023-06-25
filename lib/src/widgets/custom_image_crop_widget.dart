@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:custom_image_crop/src/models/params_model.dart';
 import 'package:flutter/material.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
@@ -11,8 +9,8 @@ import 'package:custom_image_crop/src/controllers/controller.dart';
 import 'package:custom_image_crop/src/painters/dotted_path_painter.dart';
 import 'package:custom_image_crop/src/clippers/inverted_clipper.dart';
 import 'package:custom_image_crop/src/models/model.dart';
-part 'package:custom_image_crop/src/calculators/calculate_crop_params.dart';
-part 'package:custom_image_crop/src/calculators/calculate_on_crop_params.dart';
+import 'package:custom_image_crop/src/calculators/calculate_crop_params.dart';
+import 'package:custom_image_crop/src/calculators/calculate_on_crop_params.dart';
 
 /// An image cropper that is customizable.
 /// You can rotate, scale and translate either
