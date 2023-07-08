@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart' as vector_math;
 
 import 'package:custom_image_crop/src/controllers/controller.dart';
 import 'package:custom_image_crop/src/painters/dotted_path_painter.dart';
+import 'package:custom_image_crop/src/painters/rounded_dotted_path_painter.dart';
 import 'package:custom_image_crop/src/clippers/inverted_clipper.dart';
 import 'package:custom_image_crop/src/models/model.dart';
 
@@ -75,8 +76,9 @@ class CustomImageCrop extends StatefulWidget {
   ///
   /// Change the cropping border by changing `drawPath`,
   /// we've provided two default painters as inspiration
-  /// `DottedCropPathPainter.drawPath` and
-  /// `SolidCropPathPainter.drawPath`
+  /// `DottedCropPathPainter.drawPath` or
+  /// `SolidCropPathPainter.drawPath` or
+  /// `RoundedDottedCropPathPainter.drawPath`
   CustomImageCrop({
     required this.image,
     required this.cropController,
