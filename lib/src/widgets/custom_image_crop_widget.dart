@@ -282,25 +282,28 @@ class _CustomImageCropState extends State<CustomImageCrop>
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
     final onCropParams = caclulateOnCropParams(
-        cropPercentage: widget.cropPercentage,
-        imageFit: widget.imageFit,
-        imageHeight: imageHeight,
-        imageWidth: imageWidth,
-        screenHeight: _height,
-        screenWidth: _width,
-        dataScale: data.scale,
+      cropPercentage: widget.cropPercentage,
+      imageFit: widget.imageFit,
+      imageHeight: imageHeight,
+      imageWidth: imageWidth,
+      screenHeight: _height,
+      screenWidth: _width,
+      dataScale: data.scale,
     );
-    final clipPath =
-        Path.from(_getPath(onCropParams.cropSize, onCropParams.cropSize, onCropParams.cropSize));
+    final clipPath = Path.from(_getPath(
+        onCropParams.cropSize, onCropParams.cropSize, onCropParams.cropSize));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3.all(1))
-      ..translate(onCropParams.translateScale * data.x + onCropParams.cropSize / 2,
+      ..translate(
+          onCropParams.translateScale * data.x + onCropParams.cropSize / 2,
           onCropParams.translateScale * data.y + onCropParams.cropSize / 2)
       ..scale(onCropParams.scale)
       ..rotateZ(data.angle);
     final bgPaint = Paint()
       ..color = widget.backgroundColor
       ..style = PaintingStyle.fill;
-    canvas.drawRect(Rect.fromLTWH(0, 0, onCropParams.cropSize, onCropParams.cropSize), bgPaint);
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, onCropParams.cropSize, onCropParams.cropSize),
+        bgPaint);
     canvas.save();
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
@@ -314,8 +317,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
     // final bytes = await compute(computeToByteData, <String, dynamic>{'pictureRecorder': pictureRecorder, 'cropWidth': cropWidth});
 
     ui.Picture picture = pictureRecorder.endRecording();
-    ui.Image image =
-        await picture.toImage(onCropParams.cropSize.floor(), onCropParams.cropSize.floor());
+    ui.Image image = await picture.toImage(
+        onCropParams.cropSize.floor(), onCropParams.cropSize.floor());
 
     // Adding compute would be preferrable. Unfortunately we cannot pass an ui image to this.
     // A workaround would be to save the image and load it inside of the isolate

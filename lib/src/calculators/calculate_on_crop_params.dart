@@ -50,7 +50,8 @@ OnCropParams caclulateOnCropParams({
       if (screenHeight < screenWidth) {
         uiSize = screenHeight;
         cropSize = imageHeight.toDouble();
-        translateScale = cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
+        translateScale =
+            cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
         scale = dataScale / cropPercentage * (screenHeight / screenWidth);
       } else {
         uiSize = screenWidth;
@@ -69,7 +70,8 @@ OnCropParams caclulateOnCropParams({
       if (screenHeight > screenWidth) {
         uiSize = screenHeight;
         cropSize = imageHeight.toDouble();
-        translateScale = cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
+        translateScale =
+            cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
         scale = dataScale / cropPercentage * (screenHeight / screenWidth);
       } else {
         uiSize = screenWidth;
@@ -82,7 +84,8 @@ OnCropParams caclulateOnCropParams({
     case CustomImageFit.fillVisibleHeight:
       final uiSize = screenHeight;
       final cropSize = imageHeight.toDouble();
-      final translateScale = cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
+      final translateScale =
+          cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
       final scale = dataScale / cropPercentage * (screenHeight / screenWidth);
 
       return OnCropParams(cropSize, translateScale, scale);
