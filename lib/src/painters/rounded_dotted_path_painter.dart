@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Draw a rounded dotted path around the given path
 class RoundedDottedCropPathPainter extends CustomPainter {
   static const _dashWidth = 10.0;
-  static const _dashSpace = 5.0;
+  static const _dashSpace = 10.0;
   static const _strokeWidth = 4.0;
   final Path _path;
   final _paint = Paint()
