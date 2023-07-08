@@ -65,6 +65,10 @@ class CustomImageCrop extends StatefulWidget {
   /// This widget is used to specify a custom progress indicator
   final Widget? customProgressIndicator;
 
+  /// Allows to clips the area outside of the path
+  /// By default `false`
+  final bool clipToShape;
+
   /// A custom image cropper widget
   ///
   /// Uses a `CustomImageCropController` to crop the image.
@@ -86,13 +90,14 @@ class CustomImageCrop extends StatefulWidget {
     required this.cropController,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.5),
     this.backgroundColor = Colors.white,
-    this.shape = CustomCropShape.Circle,
+    this.shape = CustomCropShape.circle,
     this.imageFit = CustomImageFit.fitCropSpace,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
     this.canRotate = true,
     this.canScale = true,
     this.canMove = true,
+    this.clipToShape = false,
     this.customProgressIndicator,
     Paint? imagePaintDuringCrop,
     Key? key,
@@ -252,7 +257,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   Path _getPath(double cropWidth, double width, double height) {
     switch (widget.shape) {
-      case CustomCropShape.Circle:
+      case CustomCropShape.circle:
         return Path()
           ..addOval(
             Rect.fromCircle(
@@ -269,6 +274,27 @@ class _CustomImageCropState extends State<CustomImageCrop>
               height: cropWidth,
             ),
           );
+    }
+  }
+
+  Path _getSavePath(double cropWidth, double width, double height) {
+    if (widget.shape == CustomCropShape.circle && widget.clipToShape) {
+      return Path()
+        ..addOval(
+          Rect.fromCircle(
+            center: Offset(width / 2, height / 2),
+            radius: cropWidth / 2,
+          ),
+        );
+    } else {
+      return Path()
+        ..addRect(
+          Rect.fromCenter(
+            center: Offset(width / 2, height / 2),
+            width: cropWidth,
+            height: cropWidth,
+          ),
+        );
     }
   }
 
@@ -290,7 +316,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
       screenWidth: _width,
       dataScale: data.scale,
     );
-    final clipPath = Path.from(_getPath(
+    final clipPath = Path.from(_getSavePath(
         onCropParams.cropSize, onCropParams.cropSize, onCropParams.cropSize));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3.all(1))
       ..translate(
@@ -350,8 +376,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
 }
 
 enum CustomCropShape {
-  Circle,
-  Square,
+  circle,
+  square,
 }
 
 enum CustomImageFit {
