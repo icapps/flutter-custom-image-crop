@@ -69,12 +69,14 @@ OnCropParams caclulateOnCropParams({
       if (screenHeight > screenWidth) {
         uiSize = screenHeight;
         cropSize = imageHeight.toDouble();
-        translateScale = cropSize / uiSize / cropPercentage * heightToWidthRatio;
+        translateScale =
+            cropSize / uiSize / cropPercentage * heightToWidthRatio;
         scale = dataScale / cropPercentage * heightToWidthRatio;
       } else {
         uiSize = screenWidth;
         cropSize = imageWidth.toDouble();
-        translateScale = cropSize / uiSize / cropPercentage / heightToWidthRatio;
+        translateScale =
+            cropSize / uiSize / cropPercentage / heightToWidthRatio;
         scale = dataScale / cropPercentage / heightToWidthRatio;
       }
 
@@ -89,7 +91,8 @@ OnCropParams caclulateOnCropParams({
         translateScale = cropSize / uiSize / cropPercentage;
         scale = dataScale / cropPercentage;
       } else {
-        translateScale = cropSize / uiSize / cropPercentage * heightToWidthRatio;
+        translateScale =
+            cropSize / uiSize / cropPercentage * heightToWidthRatio;
         scale = dataScale / cropPercentage * heightToWidthRatio;
       }
       return OnCropParams(cropSize, translateScale, scale);
@@ -100,7 +103,8 @@ OnCropParams caclulateOnCropParams({
       late final double translateScale;
       late final double scale;
       if (screenWidth > screenHeight) {
-        translateScale = cropSize / uiSize / cropPercentage / heightToWidthRatio;
+        translateScale =
+            cropSize / uiSize / cropPercentage / heightToWidthRatio;
         scale = dataScale / cropPercentage / heightToWidthRatio;
       } else {
         translateScale = cropSize / uiSize / cropPercentage;
