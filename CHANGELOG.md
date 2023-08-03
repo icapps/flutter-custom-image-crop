@@ -1,6 +1,13 @@
-## [0.0.5]
+## [0.0.6]
 
 * Added new param to CustomImageCrop for new image fit types
+
+## [0.0.5]
+
+* Added canRotate
+* Added customProgressIndicator
+* Added canScale
+* Added canMove
 
 ## [0.0.4]
 
