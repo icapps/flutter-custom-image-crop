@@ -1,0 +1,123 @@
+import 'dart:io';
+
+void main(List<String> args) {
+  printMessage('Start filtering the lcov.info file');
+  final file = File('coverage/lcov.info');
+  if (!file.existsSync()) {
+    printMessage('${file.path}" does not exist');
+    return;
+  }
+  const endOfRecord = 'end_of_record';
+  final sections = <LcovSection>[];
+  final lines = file.readAsLinesSync();
+  LcovSection? currentSection;
+  for (final line in lines) {
+    if (line.endsWith('.dart')) {
+      final filePath = line.replaceAll('SF:', '');
+      currentSection = LcovSection()
+        ..header = line
+        ..filePath = filePath;
+    } else if (line == endOfRecord) {
+      final currentSectionTmp = currentSection;
+      if (currentSectionTmp != null) {
+        currentSectionTmp.footer = line;
+        sections.add(currentSectionTmp);
+      }
+    } else {
+      currentSection?.body.add(line);
+    }
+  }
+  final filteredSections = getFilteredSections(sections);
+  final sb = StringBuffer();
+  for (final section in filteredSections) {
+    sb.write(section.toString());
+  }
+  file.writeAsStringSync(sb.toString());
+  printMessage('Filtered the lcov.info file');
+}
+
+class LcovSection {
+  String? filePath;
+  String? header;
+  final body = <String>[];
+  String? footer;
+
+  String? getBodyString() {
+    final filePathTmp = filePath;
+    if (filePathTmp == null) return null;
+    final file = File(filePathTmp);
+    final content = file.readAsLinesSync();
+    final sb = StringBuffer();
+    getFilteredBody(body, content).forEach((item) => sb
+      ..write(item)
+      ..write('\n'));
+    return sb.toString();
+  }
+
+  @override
+  String toString() {
+    return '$header\n${getBodyString()}$footer\n';
+  }
+}
+
+List<LcovSection> getFilteredSections(List<LcovSection> sections) {
+  return sections.where((section) {
+    final header = section.header;
+    if (header == null) return false;
+    if (!header.endsWith('.dart')) {
+      return false;
+    } else if (header.endsWith('.g.dart')) {
+      return false;
+    } else if (header.endsWith('.config.dart')) {
+      return false;
+    } else if (header.endsWith('injectable.dart')) {
+      return false;
+    } else if (header.startsWith('SF:lib/util/locale')) {
+      return false;
+    } else if (header.startsWith('SF:lib/widget')) {
+      return false;
+    } else if (header.startsWith('SF:lib/screen')) {
+      return false;
+    } else if (header.startsWith('SF:lib/navigator')) {
+      return false;
+    }
+    return true;
+  }).toList();
+}
+
+List<String> getFilteredBody(List<String> body, List<String> lines) {
+  return body.where((line) {
+    if (line.startsWith('DA:')) {
+      final sections = line.split(',');
+      final lineNr = int.parse(sections[0].replaceAll('DA:', ''));
+      final callCount = int.parse(sections[1]);
+      if (callCount == 0) {
+        final fileLine = lines[lineNr - 1].trim();
+        if (excludedLines.contains(fileLine)) {
+          return false;
+        }
+        for (final line in excludedStartsWithLines) {
+          if (fileLine.trim().startsWith(line)) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }).toList();
+}
+
+const excludedLines = <String>[
+  'const TranslationWriter._();',
+  'const CaseUtil._();',
+  'const LocaleGenParser._();',
+  'const LocaleGenSbWriter._();',
+  'const LocaleGenWriter._();',
+];
+
+const excludedStartsWithLines = <String>[];
+
+void printMessage(String message) {
+  // ignore: avoid_print
+  print(message);
+}
