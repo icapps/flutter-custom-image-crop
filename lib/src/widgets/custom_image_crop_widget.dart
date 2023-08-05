@@ -66,7 +66,7 @@ class CustomImageCrop extends StatefulWidget {
   final Widget? customProgressIndicator;
 
   /// Allows to clip the area outside of the path when saving
-  /// By default `false`
+  /// By default `true`
   final bool clipShapeOnSave;
 
   /// A custom image cropper widget
@@ -97,7 +97,7 @@ class CustomImageCrop extends StatefulWidget {
     this.canRotate = true,
     this.canScale = true,
     this.canMove = true,
-    this.clipShapeOnSave = false,
+    this.clipShapeOnSave = true,
     this.customProgressIndicator,
     Paint? imagePaintDuringCrop,
     Key? key,
