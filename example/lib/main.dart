@@ -40,6 +40,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late CustomImageCropController controller;
+  CustomCropShape _currentShape = CustomCropShape.Circle;
+  final TextEditingController _widthController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
+
+  double _width = 16;
+  double _height = 9;
 
   @override
   void initState() {
@@ -51,6 +57,24 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  void _changeCropShape(CustomCropShape newShape) {
+    setState(() {
+      _currentShape = newShape;
+    });
+  }
+
+  void _updateRatio() {
+    setState(() {
+      if (_widthController.text.isNotEmpty) {
+        _width = double.tryParse(_widthController.text) ?? 16;
+      }
+      if (_heightController.text.isNotEmpty) {
+        _height = double.tryParse(_heightController.text) ?? 9;
+      }
+    });
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -68,7 +92,10 @@ class _MyHomePageState extends State<MyHomePage> {
               // image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
               image: const NetworkImage(
                   'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
-              shape: CustomCropShape.Square,
+              shape: _currentShape,
+              ratio: _currentShape == CustomCropShape.Ratio
+                  ? Ratio(width: _width, height: _height)
+                  : null,
               canRotate: true,
               canMove: false,
               canScale: false,
@@ -76,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
                   icon: const Icon(Icons.refresh), onPressed: controller.reset),
@@ -106,11 +134,61 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
               ),
+              PopupMenuButton<CustomCropShape>(
+                icon: const Icon(Icons.crop_original),
+                onSelected: _changeCropShape,
+                itemBuilder: (BuildContext context) {
+                  return CustomCropShape.values.map((shape) {
+                    return PopupMenuItem<CustomCropShape>(
+                      value: shape,
+                      child: getShapeIcon(shape),
+                    );
+                  }).toList();
+                },
+              )
             ],
           ),
+          if (_currentShape == CustomCropShape.Ratio)
+            SizedBox(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _widthController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Width'),
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    child: TextField(
+                      controller: _heightController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Height'),
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  ElevatedButton(
+                    onPressed: _updateRatio,
+                    child: const Text('Update Ratio'),
+                  ),
+                ],
+              ),
+            ),
           SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),
     );
+  }
+
+  Widget getShapeIcon(CustomCropShape shape) {
+    switch (shape) {
+      case CustomCropShape.Circle:
+        return const Icon(Icons.circle_outlined);
+      case CustomCropShape.Square:
+        return const Icon(Icons.square_outlined);
+      case CustomCropShape.Ratio:
+        return const Icon(Icons.crop_16_9_outlined);
+    }
   }
 }
