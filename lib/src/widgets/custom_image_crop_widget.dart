@@ -53,7 +53,19 @@ class CustomImageCrop extends StatefulWidget {
   /// The path drawer of the border see [DottedCropPathPainter],
   /// [SolidPathPainter] for more details or how to implement a
   /// custom one
-  final CustomPaint Function(Path) drawPath;
+  final CustomPaint Function(Path, {Paint? pathPaint}) drawPath;
+
+  /// Custom paint options for drawing the cropping border.
+  ///
+  /// If [paint] is provided, it will be used for customizing the appearance
+  /// of the cropping border.
+  ///
+  /// If [paint] is not provided, default values will be used:
+  /// - Color: [Colors.white]
+  /// - Stle [PaintingStyle.stroke]
+  /// - Stroke Join [StrokeJoin.round]
+  /// - Stroke Width: 4.0
+  final Paint? pathPaint;
 
   /// Whether to allow the image to be rotated.
   final bool canRotate;
@@ -101,6 +113,7 @@ class CustomImageCrop extends StatefulWidget {
     this.imageFit = CustomImageFit.fitCropSpace,
     this.cropPercentage = 0.8,
     this.drawPath = DottedCropPathPainter.drawPath,
+    this.pathPaint,
     this.canRotate = true,
     this.canScale = true,
     this.canMove = true,
@@ -222,7 +235,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
                     ),
                   ),
                 ),
-                widget.drawPath(_path),
+                widget.drawPath(_path, pathPaint: widget.pathPaint),
               ],
             ),
           ),

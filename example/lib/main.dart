@@ -100,6 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
               canMove: false,
               canScale: false,
               customProgressIndicator: const CupertinoActivityIndicator(),
+              // use custom paint if needed
+              // pathPaint: Paint()
+              //   ..color = Colors.red
+              //   ..strokeWidth = 4.0
+              //   ..style = PaintingStyle.stroke
+              //   ..strokeJoin = StrokeJoin.round,
             ),
           ),
           Row(
