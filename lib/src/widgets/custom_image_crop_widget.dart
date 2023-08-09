@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:custom_image_crop/src/models/ratio.dart';
 import 'package:flutter/material.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
@@ -29,8 +30,18 @@ class CustomImageCrop extends StatefulWidget {
   /// The color in front of the cropped area
   final Color overlayColor;
 
-  /// The shape of the cropping area
+  /// The shape of the cropping area.
+  /// Possible values:
+  /// - [CustomCropShape.Circle] Crop area will be circular.
+  /// - [CustomCropShape.Square] Crop area will be a square.
+  /// - [CustomCropShape.Ratio] Crop area will have a specified aspect ratio.
   final CustomCropShape shape;
+
+  /// Ratio of the cropping area.
+  /// If [shape] is set to [CustomCropShape.Ratio], this property is required.
+  /// For example, to create a square crop area, use [Ratio(width: 1, height: 1)].
+  /// To create a rectangular crop area with a 16:9 aspect ratio, use [Ratio(width: 16, height: 9)].
+  final Ratio? ratio;
 
   /// How to fit image inside visible space
   final CustomImageFit imageFit;
@@ -94,10 +105,15 @@ class CustomImageCrop extends StatefulWidget {
     this.canScale = true,
     this.canMove = true,
     this.customProgressIndicator,
+    this.ratio,
     Paint? imagePaintDuringCrop,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
             (Paint()..filterQuality = FilterQuality.high),
+        assert(
+          !(shape == CustomCropShape.Ratio && ratio == null),
+          "If shape is set to Ratio, ratio should not be null.",
+        ),
         super(key: key);
 
   @override
@@ -260,6 +276,15 @@ class _CustomImageCropState extends State<CustomImageCrop>
               radius: cropWidth / 2,
             ),
           );
+      case CustomCropShape.Ratio:
+        return Path()
+          ..addRect(
+            Rect.fromCenter(
+              center: Offset(width / 2, height / 2),
+              width: cropWidth,
+              height: cropWidth * widget.ratio!.height / widget.ratio!.width,
+            ),
+          );
       default:
         return Path()
           ..addRect(
@@ -352,6 +377,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
 enum CustomCropShape {
   Circle,
   Square,
+  Ratio,
 }
 
 enum CustomImageFit {
