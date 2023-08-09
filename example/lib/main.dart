@@ -86,36 +86,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
-          // SizedBox(
-          //   height: 40,
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.center,
-          //     children: [
-          //       IconButton(
-          //         icon: const Icon(Icons.crop_free),
-          //         color: _currentShape == CustomCropShape.Circle
-          //             ? Colors.blue
-          //             : Colors.grey,
-          //         onPressed: () => _changeCropShape(CustomCropShape.Circle),
-          //       ),
-          //       IconButton(
-          //         icon: const Icon(Icons.crop_square),
-          //         color: _currentShape == CustomCropShape.Square
-          //             ? Colors.blue
-          //             : Colors.grey,
-          //         onPressed: () => _changeCropShape(CustomCropShape.Square),
-          //       ),
-          //       IconButton(
-          //         icon: const Icon(Icons.crop_16_9),
-          //         color: _currentShape == CustomCropShape.Ratio
-          //             ? Colors.blue
-          //             : Colors.grey,
-          //         onPressed: () => _changeCropShape(CustomCropShape.Ratio),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-
           Expanded(
             child: CustomImageCrop(
               cropController: controller,
