@@ -11,7 +11,7 @@ An Image cropper that is customizable
 
 # CustomImageCrop
 
-```
+```dart
 CustomImageCrop(
   cropController: controller,
   image: const AssetImage('assets/test.png'),
@@ -23,31 +23,47 @@ You can provide the image using any Imageprovider.
 ## Parameters
 
 ### required image
+
 The image that needs to be cropped
 
 ### cropController
+
 The controller used to adjust the image and crop it.
 
 ### overlayColor
+
 The color above the image that will be cropped
 
 ### backgroundColor
+
 The color behind the image. This color will also be used when there are gaps/empty space after the cropping
 
 ### shape
+
 The shape of the cropping path.
 
 ### cropPercentage
+
 How big the crop should be in regards to the width and height available to the cropping widget.
 
 ### drawPath
+
 How the border of the crop should be painted. default DottedCropPathPainter.drawPath and SolidCropPathPainter.drawPath are provided, but you can create/provide any CustomPaint.
 
 ### canRotate
+
 Whether to allow the image to be rotated.
 
 ### customProgressIndicator
+
 Custom widget for progress indicator.
+
+### ratio
+
+Ratio of the cropping area.
+If ` shape`` is set to  `CustomCropShape.Ratio`, this property is required.
+For example, to create a square crop area, use `[`Ratio(width: 1, height: 1)`.
+To create a rectangular crop area with a 16:9 aspect ratio, use `[`Ratio(width: 16, height: 9)`.
 
 # Controller Methods
 
@@ -64,11 +80,13 @@ Add the position, angle and scale to the current state. This can be used to adju
 Set the position, angle and scale to the specified values. This can be used to center the image by pressing a button for example.
 
 ## reset
+
 `void reset()`
 
 Reset the image to its default state
 
 ## onCropImage
+
 `Future<MemoryImage> onCropImage()`
 
 Crops the image in its current state, this will return a MemoryImage that contains the cropped image
@@ -77,7 +95,7 @@ Crops the image in its current state, this will return a MemoryImage that contai
 
 See example/lib
 
-```
+```dart
 class MyHomePage extends StatefulWidget {
   final String title;
 
@@ -145,4 +163,3 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 ```
-
