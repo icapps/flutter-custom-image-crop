@@ -76,3 +76,4 @@ build/
 test/coverage_helper_test.dart
 coverage/**
 .fvm/
+.vscode/settings.json
