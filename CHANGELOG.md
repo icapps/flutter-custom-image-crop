@@ -1,3 +1,7 @@
+## [0.0.7] - 2023-08-09
+
+* Added Ratio as new shape and arguments
+
 ## [0.0.6]
 
 * Added new param to CustomImageCrop for new image fit types
