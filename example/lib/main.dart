@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Custom crop example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -43,9 +43,11 @@ class _MyHomePageState extends State<MyHomePage> {
   CustomCropShape _currentShape = CustomCropShape.Circle;
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _radiusController = TextEditingController();
 
   double _width = 16;
   double _height = 9;
+  double _radius = 4;
 
   @override
   void initState() {
@@ -73,6 +75,9 @@ class _MyHomePageState extends State<MyHomePage> {
       if (_heightController.text.isNotEmpty) {
         _height = double.tryParse(_heightController.text) ?? 9;
       }
+      if (_radiusController.text.isNotEmpty) {
+        _radius = double.tryParse(_radiusController.text) ?? 4;
+      }
     });
     FocusScope.of(context).unfocus();
   }
@@ -99,8 +104,8 @@ class _MyHomePageState extends State<MyHomePage> {
               canRotate: true,
               canMove: false,
               canScale: false,
-              // user borderRadius to smooth out corners if needed
-              // borderRadius: 16,
+              borderRadius:
+                  _currentShape == CustomCropShape.Ratio ? _radius : 0,
               customProgressIndicator: const CupertinoActivityIndicator(),
               // use custom paint if needed
               // pathPaint: Paint()
@@ -175,6 +180,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       controller: _heightController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(labelText: 'Height'),
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    child: TextField(
+                      controller: _radiusController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Radius'),
                     ),
                   ),
                   const SizedBox(width: 16.0),

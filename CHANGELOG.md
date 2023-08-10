@@ -1,3 +1,7 @@
+## [0.0.9] - 2023-08-10
+
+* Added borderRadius
+
 ## [0.0.8] - 2023-08-10
 
 * Added pathPaint to customize the crop border style
