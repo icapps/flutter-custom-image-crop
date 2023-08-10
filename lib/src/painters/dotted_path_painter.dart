@@ -2,22 +2,38 @@ import 'package:flutter/material.dart';
 
 /// Draw a dotted path around the given path
 class DottedCropPathPainter extends CustomPainter {
-  static const _dashWidth = 10.0;
-  static const _dashSpace = 5.0;
-  static const _strokeWidth = 4.0;
+  final double dashWidth;
+  final double dashSpace;
   final Path _path;
-  final _paint = Paint()
-    ..color = Colors.white
-    ..strokeWidth = _strokeWidth
-    ..style = PaintingStyle.stroke
-    ..strokeJoin = StrokeJoin.round;
+  final Paint pathPaint;
 
   /// Draw a dotted path around the given path
-  DottedCropPathPainter(this._path);
+  DottedCropPathPainter(
+    this._path, {
+    this.dashWidth = 10.0,
+    this.dashSpace = 5.0,
+    required this.pathPaint,
+  });
 
   /// Return a CustomPaint widget with the current CustomPainter
-  static CustomPaint drawPath(Path path) =>
-      CustomPaint(painter: DottedCropPathPainter(path));
+  static CustomPaint drawPath(Path path, {Paint? pathPaint}) {
+    if (pathPaint != null) {
+      return CustomPaint(
+        painter: DottedCropPathPainter(path, pathPaint: pathPaint),
+      );
+    } else {
+      return CustomPaint(
+        painter: DottedCropPathPainter(
+          path,
+          pathPaint: Paint()
+            ..color = Colors.white
+            ..strokeWidth = 4.0
+            ..style = PaintingStyle.stroke
+            ..strokeJoin = StrokeJoin.round,
+        ),
+      );
+    }
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -26,14 +42,14 @@ class DottedCropPathPainter extends CustomPainter {
     for (final pathMetric in _path.computeMetrics()) {
       while (distance < pathMetric.length) {
         dashPath.addPath(
-          pathMetric.extractPath(distance, distance + _dashWidth),
+          pathMetric.extractPath(distance, distance + dashWidth),
           Offset.zero,
         );
-        distance += _dashWidth;
-        distance += _dashSpace;
+        distance += dashWidth;
+        distance += dashSpace;
       }
     }
-    canvas.drawPath(dashPath, _paint);
+    canvas.drawPath(dashPath, pathPaint);
   }
 
   @override
