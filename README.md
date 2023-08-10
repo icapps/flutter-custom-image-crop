@@ -68,6 +68,10 @@ If ` shape`` is set to  `CustomCropShape.Ratio`, this property is required.
 For example, to create a square crop area, use `[`Ratio(width: 1, height: 1)`.
 To create a rectangular crop area with a 16:9 aspect ratio, use `[`Ratio(width: 16, height: 9)`.
 
+### borderRadius
+The radius for rounded corners of the cropping area.
+
+
 # Controller Methods
 
 ## addTransition

@@ -67,6 +67,9 @@ class CustomImageCrop extends StatefulWidget {
   /// - Stroke Width: 4.0
   final Paint? pathPaint;
 
+  /// The radius for rounded corners of the cropping area (only applicable to rounded rectangle shapes).
+  final double borderRadius;
+
   /// Whether to allow the image to be rotated.
   final bool canRotate;
 
@@ -119,6 +122,7 @@ class CustomImageCrop extends StatefulWidget {
     this.canMove = true,
     this.customProgressIndicator,
     this.ratio,
+    this.borderRadius = 0,
     Paint? imagePaintDuringCrop,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
@@ -202,7 +206,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
           screenWidth: _width,
         );
         final scale = data.scale * cropParams.additionalScale;
-        _path = _getPath(cropParams.cropSizeToPaint, _width, _height);
+        _path = _getPath(
+            cropParams.cropSizeToPaint, _width, _height, widget.borderRadius);
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
@@ -279,7 +284,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
-  Path _getPath(double cropWidth, double width, double height) {
+  Path _getPath(
+      double cropWidth, double width, double height, double borderRadius) {
     switch (widget.shape) {
       case CustomCropShape.Circle:
         return Path()
@@ -291,20 +297,26 @@ class _CustomImageCropState extends State<CustomImageCrop>
           );
       case CustomCropShape.Ratio:
         return Path()
-          ..addRect(
-            Rect.fromCenter(
-              center: Offset(width / 2, height / 2),
-              width: cropWidth,
-              height: cropWidth * widget.ratio!.height / widget.ratio!.width,
+          ..addRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromCenter(
+                center: Offset(width / 2, height / 2),
+                width: cropWidth,
+                height: cropWidth * widget.ratio!.height / widget.ratio!.width,
+              ),
+              Radius.circular(borderRadius),
             ),
           );
       default:
         return Path()
-          ..addRect(
-            Rect.fromCenter(
-              center: Offset(width / 2, height / 2),
-              width: cropWidth,
-              height: cropWidth,
+          ..addRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromCenter(
+                center: Offset(width / 2, height / 2),
+                width: cropWidth,
+                height: cropWidth,
+              ),
+              Radius.circular(borderRadius),
             ),
           );
     }
@@ -328,8 +340,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
       screenWidth: _width,
       dataScale: data.scale,
     );
-    final clipPath = Path.from(_getPath(
-        onCropParams.cropSize, onCropParams.cropSize, onCropParams.cropSize));
+    final clipPath = Path.from(_getPath(onCropParams.cropSize,
+        onCropParams.cropSize, onCropParams.cropSize, widget.borderRadius));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3.all(1))
       ..translate(
           onCropParams.translateScale * data.x + onCropParams.cropSize / 2,
