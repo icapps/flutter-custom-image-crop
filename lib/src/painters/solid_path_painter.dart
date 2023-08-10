@@ -7,19 +7,19 @@ class SolidCropPathPainter extends CustomPainter {
   final Paint pathPaint;
 
   /// Draw a solid path around the given path
-  SolidCropPathPainter(this._path, {required this.pathPaint});
+  SolidCropPathPainter(this._path, this.pathPaint);
 
   /// Return a CustomPaint widget with the current CustomPainter
   static CustomPaint drawPath(Path path, {Paint? pathPaint}) {
     if (pathPaint != null) {
       return CustomPaint(
-        painter: SolidCropPathPainter(path, pathPaint: pathPaint),
+        painter: SolidCropPathPainter(path, pathPaint),
       );
     } else {
       return CustomPaint(
         painter: SolidCropPathPainter(
           path,
-          pathPaint: Paint()
+          Paint()
             ..color = Colors.white
             ..strokeWidth = _strokeWidth
             ..style = PaintingStyle.stroke
