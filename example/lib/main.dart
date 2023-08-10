@@ -99,6 +99,8 @@ class _MyHomePageState extends State<MyHomePage> {
               canRotate: true,
               canMove: false,
               canScale: false,
+              // user borderRadius to smooth out corners if needed
+              // borderRadius: 16,
               customProgressIndicator: const CupertinoActivityIndicator(),
               // use custom paint if needed
               // pathPaint: Paint()
