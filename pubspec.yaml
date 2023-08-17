@@ -1,6 +1,6 @@
 name: custom_image_crop
 description: An image cropper that is customizable. You can rotate, scale and translate either through gestures or a controller
-version: 0.0.9
+version: 0.0.10
 homepage: https://github.com/icapps/flutter-custom-image-crop
 
 environment:

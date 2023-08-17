@@ -1,3 +1,7 @@
+## [0.0.10] - 2023-08-17
+
+* Added didupdateWidget check to fix issues with updated images
+
 ## [0.0.9] - 2023-08-10
 
 * Added borderRadius
