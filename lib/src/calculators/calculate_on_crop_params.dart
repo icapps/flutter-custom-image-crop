@@ -50,18 +50,17 @@ OnCropParams caclulateOnCropParams({
       if (screenHeight < screenWidth) {
         uiSize = screenHeight;
         cropSize = imageHeight.toDouble();
-        translateScale =
-            cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
-        scale = dataScale / cropPercentage * (screenHeight / screenWidth);
       } else {
         uiSize = screenWidth;
         cropSize = imageWidth.toDouble();
-        translateScale = cropSize / uiSize / cropPercentage;
-        scale = dataScale / cropPercentage;
       }
+
+      scale = dataScale / cropPercentage;
+      translateScale = cropSize / uiSize / cropPercentage;
 
       return OnCropParams(cropSize, translateScale, scale);
     case CustomImageFit.fillVisibleSpace:
+      final heightToWidthRatio = (screenHeight / screenWidth);
       late final double uiSize;
       late final double cropSize;
       late final double translateScale;
@@ -71,29 +70,46 @@ OnCropParams caclulateOnCropParams({
         uiSize = screenHeight;
         cropSize = imageHeight.toDouble();
         translateScale =
-            cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
-        scale = dataScale / cropPercentage * (screenHeight / screenWidth);
+            cropSize / uiSize / cropPercentage * heightToWidthRatio;
+        scale = dataScale / cropPercentage * heightToWidthRatio;
       } else {
         uiSize = screenWidth;
         cropSize = imageWidth.toDouble();
-        translateScale = cropSize / uiSize / cropPercentage;
-        scale = dataScale / cropPercentage;
+        translateScale =
+            cropSize / uiSize / cropPercentage / heightToWidthRatio;
+        scale = dataScale / cropPercentage / heightToWidthRatio;
       }
 
       return OnCropParams(cropSize, translateScale, scale);
     case CustomImageFit.fillVisibleHeight:
+      final heightToWidthRatio = (screenHeight / screenWidth);
       final uiSize = screenHeight;
       final cropSize = imageHeight.toDouble();
-      final translateScale =
-          cropSize / uiSize / cropPercentage * (screenHeight / screenWidth);
-      final scale = dataScale / cropPercentage * (screenHeight / screenWidth);
-
+      late final double translateScale;
+      late final double scale;
+      if (screenWidth > screenHeight) {
+        translateScale = cropSize / uiSize / cropPercentage;
+        scale = dataScale / cropPercentage;
+      } else {
+        translateScale =
+            cropSize / uiSize / cropPercentage * heightToWidthRatio;
+        scale = dataScale / cropPercentage * heightToWidthRatio;
+      }
       return OnCropParams(cropSize, translateScale, scale);
     case CustomImageFit.fillVisiblelWidth:
+      final heightToWidthRatio = (screenHeight / screenWidth);
       final uiSize = screenWidth;
       final cropSize = imageWidth.toDouble();
-      final translateScale = cropSize / uiSize / cropPercentage;
-      final scale = dataScale / cropPercentage;
+      late final double translateScale;
+      late final double scale;
+      if (screenWidth > screenHeight) {
+        translateScale =
+            cropSize / uiSize / cropPercentage / heightToWidthRatio;
+        scale = dataScale / cropPercentage / heightToWidthRatio;
+      } else {
+        translateScale = cropSize / uiSize / cropPercentage;
+        scale = dataScale / cropPercentage;
+      }
 
       return OnCropParams(cropSize, translateScale, scale);
   }

@@ -66,8 +66,8 @@ class CustomImageCrop extends StatefulWidget {
   final Widget? customProgressIndicator;
 
   /// Allows to clips the area outside of the path
-  /// By default `false`
-  final bool clipToShape;
+  /// By default `true`
+  final bool clipShapeOnSave;
 
   /// A custom image cropper widget
   ///
@@ -97,7 +97,7 @@ class CustomImageCrop extends StatefulWidget {
     this.canRotate = true,
     this.canScale = true,
     this.canMove = true,
-    this.clipToShape = false,
+    this.clipShapeOnSave = true,
     this.customProgressIndicator,
     Paint? imagePaintDuringCrop,
     Key? key,
@@ -178,7 +178,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
           screenWidth: _width,
         );
         final scale = data.scale * cropParams.additionalScale;
-        _path = _getPath(cropParams.cropSizeToPaint, _width, _height);
+        _path = _getPath(cropParams.cropSizeToPaint, _width, _height, true);
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
@@ -255,7 +255,18 @@ class _CustomImageCropState extends State<CustomImageCrop>
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
-  Path _getPath(double cropWidth, double width, double height) {
+  Path _getPath(double cropWidth, double width, double height, bool clip) {
+    if (!clip) {
+      return Path()
+        ..addRect(
+          Rect.fromCenter(
+            center: Offset(width / 2, height / 2),
+            width: cropWidth,
+            height: cropWidth,
+          ),
+        );
+    }
+
     switch (widget.shape) {
       case CustomCropShape.circle:
         return Path()
@@ -277,27 +288,6 @@ class _CustomImageCropState extends State<CustomImageCrop>
     }
   }
 
-  Path _getSavePath(double cropWidth, double width, double height) {
-    if (widget.shape == CustomCropShape.circle && widget.clipToShape) {
-      return Path()
-        ..addOval(
-          Rect.fromCircle(
-            center: Offset(width / 2, height / 2),
-            radius: cropWidth / 2,
-          ),
-        );
-    } else {
-      return Path()
-        ..addRect(
-          Rect.fromCenter(
-            center: Offset(width / 2, height / 2),
-            width: cropWidth,
-            height: cropWidth,
-          ),
-        );
-    }
-  }
-
   @override
   Future<MemoryImage?> onCropImage() async {
     if (_imageAsUIImage == null) {
@@ -316,8 +306,12 @@ class _CustomImageCropState extends State<CustomImageCrop>
       screenWidth: _width,
       dataScale: data.scale,
     );
-    final clipPath = Path.from(_getSavePath(
-        onCropParams.cropSize, onCropParams.cropSize, onCropParams.cropSize));
+    final clipPath = Path.from(_getPath(
+      onCropParams.cropSize,
+      onCropParams.cropSize,
+      onCropParams.cropSize,
+      widget.clipShapeOnSave,
+    ));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3.all(1))
       ..translate(
           onCropParams.translateScale * data.x + onCropParams.cropSize / 2,
