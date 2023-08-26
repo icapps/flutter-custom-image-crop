@@ -276,6 +276,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
               radius: cropWidth / 2,
             ),
           );
+
       default:
         return Path()
           ..addRect(
