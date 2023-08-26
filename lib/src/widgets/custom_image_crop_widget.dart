@@ -87,6 +87,10 @@ class CustomImageCrop extends StatefulWidget {
   /// This widget is used to specify a custom progress indicator
   final Widget? customProgressIndicator;
 
+  /// Whether to clip the area outside of the path when cropping
+  /// By default, the value is `true`
+  final bool clipShapeOnCrop;
+
   /// A custom image cropper widget
   ///
   /// Uses a `CustomImageCropController` to crop the image.
@@ -116,6 +120,7 @@ class CustomImageCrop extends StatefulWidget {
     this.canRotate = true,
     this.canScale = true,
     this.canMove = true,
+    this.clipShapeOnCrop = true,
     this.customProgressIndicator,
     this.ratio,
     this.borderRadius = 0,
@@ -208,8 +213,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
           screenWidth: _width,
         );
         final scale = data.scale * cropParams.additionalScale;
-        _path = _getPath(
-            cropParams.cropSizeToPaint, _width, _height, widget.borderRadius);
+        _path = _getPath(cropParams.cropSizeToPaint, _width, _height,
+            widget.borderRadius, true);
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
@@ -286,8 +291,19 @@ class _CustomImageCropState extends State<CustomImageCrop>
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
-  Path _getPath(
-      double cropWidth, double width, double height, double borderRadius) {
+  Path _getPath(double cropWidth, double width, double height,
+      double borderRadius, bool clip) {
+    if (!clip) {
+      return Path()
+        ..addRect(
+          Rect.fromCenter(
+            center: Offset(width / 2, height / 2),
+            width: cropWidth,
+            height: cropWidth,
+          ),
+        );
+    }
+
     switch (widget.shape) {
       case CustomCropShape.Circle:
         return Path()
@@ -342,8 +358,13 @@ class _CustomImageCropState extends State<CustomImageCrop>
       screenWidth: _width,
       dataScale: data.scale,
     );
-    final clipPath = Path.from(_getPath(onCropParams.cropSize,
-        onCropParams.cropSize, onCropParams.cropSize, widget.borderRadius));
+    final clipPath = Path.from(_getPath(
+      onCropParams.cropSize,
+      onCropParams.cropSize,
+      onCropParams.cropSize,
+      widget.borderRadius,
+      widget.clipShapeOnCrop,
+    ));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3.all(1))
       ..translate(
           onCropParams.translateScale * data.x + onCropParams.cropSize / 2,
