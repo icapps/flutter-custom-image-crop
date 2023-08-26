@@ -256,9 +256,19 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   Path _getPath(double cropWidth, double width, double height, bool clip) {
+    if (!clip) {
+      return Path()
+        ..addRect(
+          Rect.fromCenter(
+            center: Offset(width / 2, height / 2),
+            width: cropWidth,
+            height: cropWidth,
+          ),
+        );
+    }
+
     switch (widget.shape) {
       case CustomCropShape.Circle:
-        if (clip) {
         return Path()
           ..addOval(
             Rect.fromCircle(
@@ -266,16 +276,6 @@ class _CustomImageCropState extends State<CustomImageCrop>
               radius: cropWidth / 2,
             ),
           );
-        } else {
-          return Path()
-            ..addRect(
-              Rect.fromCenter(
-                center: Offset(width / 2, height / 2),
-                width: cropWidth,
-                height: cropWidth,
-              ),
-            );
-        }
 
       default:
         return Path()
