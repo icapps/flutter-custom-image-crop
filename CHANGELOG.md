@@ -1,3 +1,7 @@
+## [0.0.11] - 2023-09-01
+
+* Added clipShapeOnCrop to prevent clipping the image to the crop shape
+
 ## [0.0.10] - 2023-08-17
 
 * Added didupdateWidget check to fix issues with updated images
