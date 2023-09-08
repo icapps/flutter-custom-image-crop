@@ -126,7 +126,8 @@ class CustomImageCrop extends StatefulWidget {
     this.borderRadius = 0,
     Paint? imagePaintDuringCrop,
     Key? key,
-  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ?? (Paint()..filterQuality = FilterQuality.high),
+  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
+            (Paint()..filterQuality = FilterQuality.high),
         assert(
           !(shape == CustomCropShape.Ratio && ratio == null),
           "If shape is set to Ratio, ratio should not be null.",
@@ -137,7 +138,8 @@ class CustomImageCrop extends StatefulWidget {
   _CustomImageCropState createState() => _CustomImageCropState();
 }
 
-class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropListener {
+class _CustomImageCropState extends State<CustomImageCrop>
+    with CustomImageCropListener {
   CropImageData? _dataTransitionStart;
   late Path _path;
   late double _width, _height;
@@ -234,7 +236,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   left: data.x + _width / 2,
                   top: data.y + _height / 2,
                   child: Transform(
-                    transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, scale))
+                    transform: Matrix4.diagonal3(
+                        vector_math.Vector3(scale, scale, scale))
                       ..rotateZ(data.angle)
                       ..translate(-image.width / 2, -image.height / 2),
                     child: Image(
@@ -264,7 +267,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   }
 
   void onScaleUpdate(ScaleEvent event) {
-    final scale = widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
+    final scale =
+        widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
 
     final angle = widget.canRotate ? event.rotationAngle : 0.0;
 
