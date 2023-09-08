@@ -16,20 +16,36 @@ class ResultScreen extends StatelessWidget {
         title: const Text('Result'),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
-      body: Center(
-        child: Column(
-          children: [
-            const Spacer(),
-            Image(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+                decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blueGrey.shade400,
+                  Colors.blueGrey.shade600,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            )),
+          ),
+          Center(
+            child: Image(
               image: image,
             ),
-            ElevatedButton(
+          ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: ElevatedButton(
               child: const Text('Back'),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            const Spacer(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
