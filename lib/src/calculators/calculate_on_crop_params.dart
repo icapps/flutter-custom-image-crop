@@ -110,7 +110,7 @@ OnCropParams caclulateOnCropParams({
       }
       break;
 
-    case CustomImageFit.fillVisiblelWidth:
+    case CustomImageFit.fillVisibleWidth:
       final heightToWidthRatio = (screenHeight / screenWidth);
       uiSize = screenWidth;
       cropSizeMax = imageWidth.toDouble();

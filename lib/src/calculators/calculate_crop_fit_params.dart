@@ -106,7 +106,7 @@ CropFitParams calculateCropFitParams({
       defaultScale = screenHeight / imageHeight;
       break;
 
-    case CustomImageFit.fillVisiblelWidth:
+    case CustomImageFit.fillVisibleWidth:
       if (screenWidth <= screenHeight * aspectRatio) {
         cropSizeWidth = screenWidth * cropPercentage;
         cropSizeHeight = cropSizeWidth / aspectRatio;
