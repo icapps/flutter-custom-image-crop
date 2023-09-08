@@ -126,8 +126,7 @@ class CustomImageCrop extends StatefulWidget {
     this.borderRadius = 0,
     Paint? imagePaintDuringCrop,
     Key? key,
-  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
-            (Paint()..filterQuality = FilterQuality.high),
+  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ?? (Paint()..filterQuality = FilterQuality.high),
         assert(
           !(shape == CustomCropShape.Ratio && ratio == null),
           "If shape is set to Ratio, ratio should not be null.",
@@ -138,8 +137,7 @@ class CustomImageCrop extends StatefulWidget {
   _CustomImageCropState createState() => _CustomImageCropState();
 }
 
-class _CustomImageCropState extends State<CustomImageCrop>
-    with CustomImageCropListener {
+class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropListener {
   CropImageData? _dataTransitionStart;
   late Path _path;
   late double _width, _height;
@@ -236,8 +234,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
                   left: data.x + _width / 2,
                   top: data.y + _height / 2,
                   child: Transform(
-                    transform: Matrix4.diagonal3(
-                        vector_math.Vector3(scale, scale, scale))
+                    transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, scale))
                       ..rotateZ(data.angle)
                       ..translate(-image.width / 2, -image.height / 2),
                     child: Image(
@@ -267,12 +264,19 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   void onScaleUpdate(ScaleEvent event) {
-    final scale =
-        widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
-
+    final scale = widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
     final angle = widget.canRotate ? event.rotationAngle : 0.0;
 
     if (_dataTransitionStart != null) {
+      if (!_canMove(
+        data +
+            (_dataTransitionStart! -
+                CropImageData(
+                  scale: scale,
+                  angle: angle,
+                )),
+      )) return;
+
       addTransition(
         _dataTransitionStart! -
             CropImageData(
@@ -293,8 +297,28 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   void onMoveUpdate(MoveEvent event) {
     if (!widget.canMove) return;
+    if (!_canMove(data + CropImageData(x: event.delta.dx, y: event.delta.dy))) return;
 
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
+  }
+
+  bool _canMove(CropImageData data) {
+    final image = _imageAsUIImage!;
+    final cropFitParams = calculateCropFitParams(
+      cropPercentage: widget.cropPercentage,
+      imageFit: widget.imageFit,
+      imageHeight: image.height,
+      imageWidth: image.width,
+      screenHeight: _height,
+      screenWidth: _width,
+      aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+    );
+    final scale = data.scale * cropFitParams.additionalScale;
+    final left = data.x - image.width / 2 * scale + cropFitParams.cropSizeWidth / 2;
+    final right = data.x + image.width / 2 * scale - cropFitParams.cropSizeWidth / 2;
+    final top = data.y - image.height / 2 * scale + cropFitParams.cropSizeHeight / 2;
+    final bottom = data.y + image.height / 2 * scale - cropFitParams.cropSizeHeight / 2;
+    return left < 0 && right > 0 && top < 0 && bottom > 0;
   }
 
   Path _getPath({
