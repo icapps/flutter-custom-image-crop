@@ -23,9 +23,11 @@ OnCropParams caclulateOnCropParams({
   /// used to adjust image scale
   final double scale;
 
+  /// Temp variable used to calculate the translateScale
+  final double uiSize;
+
   switch (imageFit) {
     case CustomImageFit.fillCropSpace:
-      final double uiSize;
       if (screenWidth > screenHeight * aspectRatio) {
         uiSize = screenHeight;
         cropSizeMax = imageHeight.toDouble();
@@ -38,21 +40,26 @@ OnCropParams caclulateOnCropParams({
       break;
 
     case CustomImageFit.fitCropSpace:
-      final uiSize = min(screenWidth, screenHeight);
-      cropSizeMax = max(imageWidth / min(1, aspectRatio), imageHeight * max(1, aspectRatio)).toDouble();
+      if (screenWidth > screenHeight * aspectRatio) {
+        uiSize = screenHeight;
+        cropSizeMax = imageWidth.toDouble() / aspectRatio;
+      } else {
+        uiSize = screenWidth;
+        cropSizeMax = imageHeight.toDouble() * aspectRatio;
+      }
       translateScale = cropSizeMax / (uiSize * cropPercentage);
       scale = dataScale;
       break;
 
     case CustomImageFit.fillCropWidth:
-      final uiSize = screenWidth;
+      uiSize = screenWidth;
       cropSizeMax = imageWidth / min(1, aspectRatio);
       translateScale = cropSizeMax / (uiSize * cropPercentage);
       scale = dataScale;
       break;
 
     case CustomImageFit.fillCropHeight:
-      final uiSize = screenHeight;
+      uiSize = screenHeight;
       cropSizeMax = imageHeight * max(1, aspectRatio);
       translateScale = cropSizeMax / (uiSize * cropPercentage);
       scale = dataScale;
@@ -75,12 +82,12 @@ OnCropParams caclulateOnCropParams({
       final heightToWidthRatio = (screenHeight / screenWidth);
 
       if (screenHeight * aspectRatio > screenWidth) {
-        final uiSize = screenHeight;
+        uiSize = screenHeight;
         cropSizeMax = imageHeight.toDouble();
         translateScale = cropSizeMax / uiSize / cropPercentage * heightToWidthRatio;
         scale = dataScale / cropPercentage * heightToWidthRatio;
       } else {
-        final uiSize = screenWidth;
+        uiSize = screenWidth;
         cropSizeMax = imageWidth.toDouble();
         translateScale = cropSizeMax / uiSize / cropPercentage / heightToWidthRatio;
         scale = dataScale / cropPercentage / heightToWidthRatio;
@@ -89,7 +96,7 @@ OnCropParams caclulateOnCropParams({
 
     case CustomImageFit.fillVisibleHeight:
       final heightToWidthRatio = (screenHeight / screenWidth);
-      final uiSize = screenHeight;
+      uiSize = screenHeight;
       cropSizeMax = imageHeight.toDouble();
       if (screenWidth > screenHeight * aspectRatio) {
         translateScale = cropSizeMax / uiSize / cropPercentage;
@@ -102,7 +109,7 @@ OnCropParams caclulateOnCropParams({
 
     case CustomImageFit.fillVisiblelWidth:
       final heightToWidthRatio = (screenHeight / screenWidth);
-      final uiSize = screenWidth;
+      uiSize = screenWidth;
       cropSizeMax = imageWidth.toDouble();
       if (screenWidth > screenHeight * aspectRatio) {
         translateScale = cropSizeMax / uiSize / cropPercentage / heightToWidthRatio;
