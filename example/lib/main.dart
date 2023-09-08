@@ -41,6 +41,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late CustomImageCropController controller;
   CustomCropShape _currentShape = CustomCropShape.Circle;
+  CustomImageFit _imageFit = CustomImageFit.fillCropSpace;
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _radiusController = TextEditingController();
@@ -64,6 +65,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void _changeCropShape(CustomCropShape newShape) {
     setState(() {
       _currentShape = newShape;
+    });
+  }
+
+  void _changeImageFit(CustomImageFit imageFit) {
+    setState(() {
+      _imageFit = imageFit;
     });
   }
 
@@ -94,66 +101,38 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: CustomImageCrop(
               cropController: controller,
-              // image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
-              image: const NetworkImage(
-                  'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
+              image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
+              // image: const NetworkImage('https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
               shape: _currentShape,
-              ratio: _currentShape == CustomCropShape.Ratio
-                  ? Ratio(width: _width, height: _height)
-                  : null,
+              ratio: _currentShape == CustomCropShape.Ratio ? Ratio(width: _width, height: _height) : null,
               canRotate: true,
-              canMove: false,
-              canScale: false,
-              borderRadius:
-                  _currentShape == CustomCropShape.Ratio ? _radius : 0,
+              canMove: true,
+              canScale: true,
+              borderRadius: _currentShape == CustomCropShape.Ratio ? _radius : 0,
               customProgressIndicator: const CupertinoActivityIndicator(),
-              // use custom paint if needed
-              // pathPaint: Paint()
-              //   ..color = Colors.red
-              //   ..strokeWidth = 4.0
-              //   ..style = PaintingStyle.stroke
-              //   ..strokeJoin = StrokeJoin.round,
+              imageFit: _imageFit,
+              pathPaint: Paint()
+                ..color = Colors.red
+                ..strokeWidth = 4.0
+                ..style = PaintingStyle.stroke
+                ..strokeJoin = StrokeJoin.round,
             ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                  icon: const Icon(Icons.refresh), onPressed: controller.reset),
-              IconButton(
-                  icon: const Icon(Icons.zoom_in),
-                  onPressed: () =>
-                      controller.addTransition(CropImageData(scale: 1.33))),
-              IconButton(
-                  icon: const Icon(Icons.zoom_out),
-                  onPressed: () =>
-                      controller.addTransition(CropImageData(scale: 0.75))),
-              IconButton(
-                  icon: const Icon(Icons.rotate_left),
-                  onPressed: () =>
-                      controller.addTransition(CropImageData(angle: -pi / 4))),
-              IconButton(
-                  icon: const Icon(Icons.rotate_right),
-                  onPressed: () =>
-                      controller.addTransition(CropImageData(angle: pi / 4))),
-              IconButton(
-                icon: const Icon(Icons.crop),
-                onPressed: () async {
-                  final image = await controller.onCropImage();
-                  if (image != null) {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            ResultScreen(image: image)));
-                  }
-                },
-              ),
-              PopupMenuButton<CustomCropShape>(
+              IconButton(icon: const Icon(Icons.refresh), onPressed: controller.reset),
+              IconButton(icon: const Icon(Icons.zoom_in), onPressed: () => controller.addTransition(CropImageData(scale: 1.33))),
+              IconButton(icon: const Icon(Icons.zoom_out), onPressed: () => controller.addTransition(CropImageData(scale: 0.75))),
+              IconButton(icon: const Icon(Icons.rotate_left), onPressed: () => controller.addTransition(CropImageData(angle: -pi / 4))),
+              IconButton(icon: const Icon(Icons.rotate_right), onPressed: () => controller.addTransition(CropImageData(angle: pi / 4))),
+              PopupMenuButton(
                 icon: const Icon(Icons.crop_original),
                 onSelected: _changeCropShape,
                 itemBuilder: (BuildContext context) {
                   return CustomCropShape.values.map(
                     (shape) {
-                      return PopupMenuItem<CustomCropShape>(
+                      return PopupMenuItem(
                         value: shape,
                         child: getShapeIcon(shape),
                       );
@@ -161,9 +140,35 @@ class _MyHomePageState extends State<MyHomePage> {
                   ).toList();
                 },
               ),
+              PopupMenuButton(
+                icon: const Icon(Icons.fit_screen),
+                onSelected: _changeImageFit,
+                itemBuilder: (BuildContext context) {
+                  return CustomImageFit.values.map(
+                    (imageFit) {
+                      return PopupMenuItem(
+                        value: imageFit,
+                        child: Text(imageFit.name),
+                      );
+                    },
+                  ).toList();
+                },
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.crop,
+                  color: Colors.green,
+                ),
+                onPressed: () async {
+                  final image = await controller.onCropImage();
+                  if (image != null) {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ResultScreen(image: image)));
+                  }
+                },
+              ),
             ],
           ),
-          if (_currentShape == CustomCropShape.Ratio)
+          if (_currentShape == CustomCropShape.Ratio) ...[
             SizedBox(
               child: Row(
                 children: [
@@ -198,6 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
+          ],
           SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),
