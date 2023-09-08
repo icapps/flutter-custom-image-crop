@@ -462,5 +462,5 @@ enum CustomImageFit {
   fitVisibleSpace,
   fillVisibleSpace,
   fillVisibleHeight,
-  fillVisiblelWidth,
+  fillVisibleWidth,
 }
