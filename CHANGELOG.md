@@ -1,3 +1,7 @@
+## [0.0.12] - 2023-09-08
+
+* Fixed issues with Ratio and CustomImageCrop
+
 ## [0.0.11] - 2023-09-01
 
 * Added clipShapeOnCrop to prevent clipping the image to the crop shape
