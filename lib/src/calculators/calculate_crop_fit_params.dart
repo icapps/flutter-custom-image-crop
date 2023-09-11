@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:custom_image_crop/src/models/params_model.dart';
 import 'package:custom_image_crop/src/widgets/custom_image_crop_widget.dart';
 
@@ -39,13 +37,11 @@ CropFitParams calculateCropFitParams({
       if (screenWidth <= screenHeight * aspectRatio) {
         cropSizeWidth = screenWidth * cropPercentage;
         cropSizeHeight = cropSizeWidth / aspectRatio;
-        defaultScale =
-            cropSizeWidth / max(imageWidth, imageHeight * aspectRatio);
+        defaultScale = cropSizeHeight / imageHeight;
       } else {
         cropSizeHeight = screenHeight * cropPercentage;
         cropSizeWidth = cropSizeHeight * aspectRatio;
-        defaultScale =
-            cropSizeHeight / max(imageHeight, imageWidth / aspectRatio);
+        defaultScale = cropSizeWidth / imageWidth;
       }
       break;
 
