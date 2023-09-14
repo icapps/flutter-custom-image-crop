@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:custom_image_crop/custom_image_crop.dart';
-import 'package:custom_image_crop/src/calculators/calculate_crop_params.dart';
+import 'package:custom_image_crop/src/calculators/calculate_crop_fit_params.dart';
 import 'package:custom_image_crop/src/calculators/calculate_on_crop_params.dart';
 import 'package:custom_image_crop/src/clippers/inverted_clipper.dart';
 import 'package:flutter/material.dart';
@@ -204,17 +204,23 @@ class _CustomImageCropState extends State<CustomImageCrop>
       builder: (context, constraints) {
         _width = constraints.maxWidth;
         _height = constraints.maxHeight;
-        final cropParams = calculateCropParams(
+        final cropFitParams = calculateCropFitParams(
           cropPercentage: widget.cropPercentage,
           imageFit: widget.imageFit,
           imageHeight: image.height,
           imageWidth: image.width,
           screenHeight: _height,
           screenWidth: _width,
+          aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
         );
-        final scale = data.scale * cropParams.additionalScale;
-        _path = _getPath(cropParams.cropSizeToPaint, _width, _height,
-            widget.borderRadius, true);
+        final scale = data.scale * cropFitParams.additionalScale;
+        _path = _getPath(
+          cropWidth: cropFitParams.cropSizeWidth,
+          cropHeight: cropFitParams.cropSizeHeight,
+          width: _width,
+          height: _height,
+          borderRadius: widget.borderRadius,
+        );
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
@@ -291,15 +297,21 @@ class _CustomImageCropState extends State<CustomImageCrop>
     addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
-  Path _getPath(double cropWidth, double width, double height,
-      double borderRadius, bool clip) {
-    if (!clip) {
+  Path _getPath({
+    required double cropWidth,
+    required double cropHeight,
+    required double width,
+    required double height,
+    required double borderRadius,
+    bool clipShape = true,
+  }) {
+    if (!clipShape) {
       return Path()
         ..addRect(
           Rect.fromCenter(
             center: Offset(width / 2, height / 2),
             width: cropWidth,
-            height: cropWidth,
+            height: cropHeight,
           ),
         );
     }
@@ -320,7 +332,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
               Rect.fromCenter(
                 center: Offset(width / 2, height / 2),
                 width: cropWidth,
-                height: cropWidth * widget.ratio!.height / widget.ratio!.width,
+                height: cropHeight,
               ),
               Radius.circular(borderRadius),
             ),
@@ -332,7 +344,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
               Rect.fromCenter(
                 center: Offset(width / 2, height / 2),
                 width: cropWidth,
-                height: cropWidth,
+                height: cropHeight,
               ),
               Radius.circular(borderRadius),
             ),
@@ -357,31 +369,43 @@ class _CustomImageCropState extends State<CustomImageCrop>
       screenHeight: _height,
       screenWidth: _width,
       dataScale: data.scale,
+      aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
     );
     final clipPath = Path.from(_getPath(
-      onCropParams.cropSize,
-      onCropParams.cropSize,
-      onCropParams.cropSize,
-      widget.borderRadius,
-      widget.clipShapeOnCrop,
+      cropWidth: onCropParams.cropSizeWidth,
+      cropHeight: onCropParams.cropSizeHeight,
+      width: onCropParams.cropSizeWidth,
+      height: onCropParams.cropSizeHeight,
+      borderRadius: widget.borderRadius,
+      clipShape: widget.clipShapeOnCrop,
     ));
     final matrix4Image = Matrix4.diagonal3(vector_math.Vector3.all(1))
       ..translate(
-          onCropParams.translateScale * data.x + onCropParams.cropSize / 2,
-          onCropParams.translateScale * data.y + onCropParams.cropSize / 2)
+        onCropParams.translateScale * data.x + onCropParams.cropSizeWidth / 2,
+        onCropParams.translateScale * data.y + onCropParams.cropSizeHeight / 2,
+      )
       ..scale(onCropParams.scale)
       ..rotateZ(data.angle);
     final bgPaint = Paint()
       ..color = widget.backgroundColor
       ..style = PaintingStyle.fill;
     canvas.drawRect(
-        Rect.fromLTWH(0, 0, onCropParams.cropSize, onCropParams.cropSize),
-        bgPaint);
+      Rect.fromLTWH(
+        0,
+        0,
+        onCropParams.cropSizeWidth,
+        onCropParams.cropSizeHeight,
+      ),
+      bgPaint,
+    );
     canvas.save();
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
-    canvas.drawImage(_imageAsUIImage!,
-        Offset(-imageWidth / 2, -imageHeight / 2), widget.imagePaintDuringCrop);
+    canvas.drawImage(
+      _imageAsUIImage!,
+      Offset(-imageWidth / 2, -imageHeight / 2),
+      widget.imagePaintDuringCrop,
+    );
     canvas.restore();
 
     // Optionally remove magenta from image by evaluating every pixel
@@ -391,7 +415,9 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
     ui.Picture picture = pictureRecorder.endRecording();
     ui.Image image = await picture.toImage(
-        onCropParams.cropSize.floor(), onCropParams.cropSize.floor());
+      onCropParams.cropSizeWidth.floor(),
+      onCropParams.cropSizeHeight.floor(),
+    );
 
     // Adding compute would be preferrable. Unfortunately we cannot pass an ui image to this.
     // A workaround would be to save the image and load it inside of the isolate
@@ -429,11 +455,12 @@ enum CustomCropShape {
 }
 
 enum CustomImageFit {
+  fillCropSpace,
   fitCropSpace,
   fillCropWidth,
   fillCropHeight,
   fitVisibleSpace,
   fillVisibleSpace,
   fillVisibleHeight,
-  fillVisiblelWidth,
+  fillVisibleWidth,
 }

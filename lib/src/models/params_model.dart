@@ -1,21 +1,28 @@
 /// Params used to display crop screen.
 class CropFitParams {
-  /// The size of actual crop area.
-  final double cropSize;
+  /// The width of displayed crop area.
+  final double cropSizeWidth;
 
-  /// The size of crop area to show on screen.
-  final double cropSizeToPaint;
+  /// The height of displayed crop area.
+  final double cropSizeHeight;
 
   /// The scale used to adjust display of the image based on 'CustomImageFit' type.
   final double additionalScale;
 
-  CropFitParams(this.cropSize, this.cropSizeToPaint, this.additionalScale);
+  CropFitParams({
+    required this.cropSizeWidth,
+    required this.cropSizeHeight,
+    required this.additionalScale,
+  });
 }
 
 /// Params used to crop image.
 class OnCropParams {
-  /// The size of actual crop area.
-  final double cropSize;
+  /// The width of actual crop area.
+  final double cropSizeWidth;
+
+  /// The height of actual crop area.
+  final double cropSizeHeight;
 
   /// The translate scale used to crop the image based on 'CustomImageFit' type.
   final double translateScale;
@@ -23,5 +30,10 @@ class OnCropParams {
   /// Is used to crop the image based on 'CustomImageFit' type.
   final double scale;
 
-  OnCropParams(this.cropSize, this.translateScale, this.scale);
+  OnCropParams({
+    required this.cropSizeWidth,
+    required this.cropSizeHeight,
+    required this.translateScale,
+    required this.scale,
+  });
 }

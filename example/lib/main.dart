@@ -41,6 +41,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late CustomImageCropController controller;
   CustomCropShape _currentShape = CustomCropShape.Circle;
+  CustomImageFit _imageFit = CustomImageFit.fillCropSpace;
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _radiusController = TextEditingController();
@@ -64,6 +65,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void _changeCropShape(CustomCropShape newShape) {
     setState(() {
       _currentShape = newShape;
+    });
+  }
+
+  void _changeImageFit(CustomImageFit imageFit) {
+    setState(() {
+      _imageFit = imageFit;
     });
   }
 
@@ -102,17 +109,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   ? Ratio(width: _width, height: _height)
                   : null,
               canRotate: true,
-              canMove: false,
-              canScale: false,
+              canMove: true,
+              canScale: true,
               borderRadius:
                   _currentShape == CustomCropShape.Ratio ? _radius : 0,
               customProgressIndicator: const CupertinoActivityIndicator(),
-              // use custom paint if needed
-              // pathPaint: Paint()
-              //   ..color = Colors.red
-              //   ..strokeWidth = 4.0
-              //   ..style = PaintingStyle.stroke
-              //   ..strokeJoin = StrokeJoin.round,
+              imageFit: _imageFit,
+              pathPaint: Paint()
+                ..color = Colors.red
+                ..strokeWidth = 4.0
+                ..style = PaintingStyle.stroke
+                ..strokeJoin = StrokeJoin.round,
             ),
           ),
           Row(
@@ -136,8 +143,39 @@ class _MyHomePageState extends State<MyHomePage> {
                   icon: const Icon(Icons.rotate_right),
                   onPressed: () =>
                       controller.addTransition(CropImageData(angle: pi / 4))),
+              PopupMenuButton(
+                icon: const Icon(Icons.crop_original),
+                onSelected: _changeCropShape,
+                itemBuilder: (BuildContext context) {
+                  return CustomCropShape.values.map(
+                    (shape) {
+                      return PopupMenuItem(
+                        value: shape,
+                        child: getShapeIcon(shape),
+                      );
+                    },
+                  ).toList();
+                },
+              ),
+              PopupMenuButton(
+                icon: const Icon(Icons.fit_screen),
+                onSelected: _changeImageFit,
+                itemBuilder: (BuildContext context) {
+                  return CustomImageFit.values.map(
+                    (imageFit) {
+                      return PopupMenuItem(
+                        value: imageFit,
+                        child: Text(imageFit.label),
+                      );
+                    },
+                  ).toList();
+                },
+              ),
               IconButton(
-                icon: const Icon(Icons.crop),
+                icon: const Icon(
+                  Icons.crop,
+                  color: Colors.green,
+                ),
                 onPressed: () async {
                   final image = await controller.onCropImage();
                   if (image != null) {
@@ -147,23 +185,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
               ),
-              PopupMenuButton<CustomCropShape>(
-                icon: const Icon(Icons.crop_original),
-                onSelected: _changeCropShape,
-                itemBuilder: (BuildContext context) {
-                  return CustomCropShape.values.map(
-                    (shape) {
-                      return PopupMenuItem<CustomCropShape>(
-                        value: shape,
-                        child: getShapeIcon(shape),
-                      );
-                    },
-                  ).toList();
-                },
-              ),
             ],
           ),
-          if (_currentShape == CustomCropShape.Ratio)
+          if (_currentShape == CustomCropShape.Ratio) ...[
             SizedBox(
               child: Row(
                 children: [
@@ -198,6 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
+          ],
           SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),
@@ -212,6 +237,29 @@ class _MyHomePageState extends State<MyHomePage> {
         return const Icon(Icons.square_outlined);
       case CustomCropShape.Ratio:
         return const Icon(Icons.crop_16_9_outlined);
+    }
+  }
+}
+
+extension CustomImageFitExtension on CustomImageFit {
+  String get label {
+    switch (this) {
+      case CustomImageFit.fillCropSpace:
+        return 'Fill crop space';
+      case CustomImageFit.fitCropSpace:
+        return 'Fit crop space';
+      case CustomImageFit.fillCropHeight:
+        return 'Fill crop height';
+      case CustomImageFit.fillCropWidth:
+        return 'Fill crop width';
+      case CustomImageFit.fillVisibleSpace:
+        return 'Fill visible space';
+      case CustomImageFit.fitVisibleSpace:
+        return 'Fit visible space';
+      case CustomImageFit.fillVisibleHeight:
+        return 'Fill visible height';
+      case CustomImageFit.fillVisibleWidth:
+        return 'Fill visible width';
     }
   }
 }
