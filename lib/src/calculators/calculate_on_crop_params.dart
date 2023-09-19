@@ -28,15 +28,18 @@ OnCropParams caclulateOnCropParams({
 
   switch (imageFit) {
     case CustomImageFit.fillCropSpace:
+      double cropScale;
       if (screenWidth > screenHeight * aspectRatio) {
         uiSize = screenHeight;
         cropSizeMax = imageHeight.toDouble();
+        cropScale = max(cropSizeMax / imageWidth, 1.0);
       } else {
         uiSize = screenWidth;
         cropSizeMax = imageWidth.toDouble();
+        cropScale = max(cropSizeMax / imageHeight, 1.0);
       }
       translateScale = cropSizeMax / (uiSize * cropPercentage);
-      scale = dataScale;
+      scale = dataScale * cropScale;
       break;
 
     case CustomImageFit.fitCropSpace:
