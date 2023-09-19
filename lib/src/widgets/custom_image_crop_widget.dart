@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:custom_image_crop/custom_image_crop.dart';
@@ -273,7 +274,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
     final angle = widget.canRotate ? event.rotationAngle : 0.0;
 
     if (_dataTransitionStart != null) {
-      addTransition(
+      widget.cropController.addTransition(
         _dataTransitionStart! -
             CropImageData(
               scale: scale,
@@ -294,7 +295,107 @@ class _CustomImageCropState extends State<CustomImageCrop>
   void onMoveUpdate(MoveEvent event) {
     if (!widget.canMove) return;
 
-    addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
+    widget.cropController.addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
+  }
+
+  Rect _getInitialImageRect() {
+    assert(_imageAsUIImage != null);
+    final image = _imageAsUIImage!;
+    final cropFitParams = calculateCropFitParams(
+      cropPercentage: widget.cropPercentage,
+      imageFit: widget.imageFit,
+      imageHeight: image.height,
+      imageWidth: image.width,
+      screenHeight: _height,
+      screenWidth: _width,
+      aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+    );
+    final initialWidth = _imageAsUIImage!.width * cropFitParams.additionalScale;
+    final initialHeight = _imageAsUIImage!.height * cropFitParams.additionalScale;
+    return Rect.fromLTWH(
+      (_width - initialWidth) / 2,
+      (_height - initialHeight) / 2,
+      initialWidth,
+      initialHeight,
+    );
+  }
+
+   // just support 'pi/2 * n' angle for now
+  bool _isAngleSupported() {
+    final angle = data.angle;
+    return angle % (pi/2) == 0;
+  }
+
+  void _correctTransition(CropImageData transition, VoidCallback callback) {
+    if (_imageAsUIImage == null ||
+        widget.imageFit != CustomImageFit.fillCropSpace ||
+        !_isAngleSupported()) {
+      callback();
+      return;
+    }
+    final startData = CropImageData(
+      scale: data.scale,
+      angle: data.angle,
+      x: data.x,
+      y: data.y,
+    );
+    callback();
+    final initialImageRect = _getInitialImageRect();
+    final diffScale = (1 - data.scale) / 2;
+    final left = initialImageRect.left + diffScale * initialImageRect.width + data.x;
+    final top = initialImageRect.top + diffScale * initialImageRect.height + data.y;
+    Rect imageRect = Rect.fromLTWH(left, top, data.scale * initialImageRect.width, data.scale * initialImageRect.height);
+    Offset topLeft, topRight, bottomLeft, bottomRight;
+    final rad = atan(imageRect.height / imageRect.width);
+    final len = sqrt(pow(imageRect.width / 2, 2) + pow(imageRect.height / 2, 2));
+
+    if (data.angle != 0) {
+      final clockAngle = rad + data.angle;
+      final counterClockAngle = rad - data.angle;
+      final cosClockValue = len * cos(clockAngle);
+      final sinClockValue = len * sin(clockAngle);
+      final cosCounterClockValue = len * cos(counterClockAngle);
+      final sinCounterClockValue = len * sin(counterClockAngle);
+      bottomRight =
+          imageRect.center.translate(cosClockValue, sinClockValue);
+      topRight =
+          imageRect.center.translate(cosCounterClockValue, -sinCounterClockValue);
+      topLeft =
+          imageRect.center.translate(-cosClockValue, -sinClockValue);
+      bottomLeft =
+          imageRect.center.translate(-cosCounterClockValue, sinCounterClockValue);
+
+      Path imagePath = Path()
+        ..moveTo(topLeft.dx, topLeft.dy)
+        ..lineTo(topRight.dx, topRight.dy)
+        ..lineTo(bottomRight.dx, bottomRight.dy)
+        ..lineTo(bottomLeft.dx, bottomLeft.dy)
+        ..close();
+      imageRect = imagePath.getBounds();
+    }
+    final pathRect = _path.getBounds();
+
+    double toPrecision(num n) => double.parse(n.toStringAsFixed(1));
+
+    num compareTwoDecimal(double a, double b) => toPrecision(a) - toPrecision(b);
+    
+    if (compareTwoDecimal(imageRect.left, pathRect.left) <= 0 &&
+        compareTwoDecimal(imageRect.top, pathRect.top) <= 0 &&
+        compareTwoDecimal(imageRect.right, pathRect.right) >= 0 &&
+        compareTwoDecimal(imageRect.bottom, pathRect.bottom) >= 0) {
+      return;
+    }
+    if (transition.x != 0 || transition.y != 0 || transition.angle != 0) {
+      double deltaX = min(pathRect.left - imageRect.left, 0);
+      deltaX = pathRect.right > imageRect.right ? pathRect.right - imageRect.right : deltaX;
+      double deltaY = min(pathRect.top - imageRect.top, 0);
+      deltaY = pathRect.bottom > imageRect.bottom ? pathRect.bottom - imageRect.bottom : deltaY;
+      _addTransitionInternal(CropImageData(x: deltaX, y: deltaY));
+      return;
+    }
+    if (transition.scale != 1.0) {
+      _addTransitionInternal(CropImageData(scale: startData.scale / data.scale));
+    }
   }
 
   Path _getPath({
@@ -425,16 +526,14 @@ class _CustomImageCropState extends State<CustomImageCrop>
     return bytes == null ? null : MemoryImage(bytes.buffer.asUint8List());
   }
 
+  void _addTransitionInternal(CropImageData transition) {
+    setData(data + transition);
+  }
+
   @override
   void addTransition(CropImageData transition) {
-    setState(() {
-      data += transition;
-      // For now, this will do. The idea is that we create
-      // a path from the data and check if when we combine
-      // that with the crop path that the resulting path
-      // overlap the hole (crop). So we check if all pixels
-      // from the crop contain pixels from the original image
-      data.scale = data.scale.clamp(0.1, 10.0);
+    _correctTransition(transition, () {
+      _addTransitionInternal(transition);
     });
   }
 
