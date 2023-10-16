@@ -71,6 +71,9 @@ To create a rectangular crop area with a 16:9 aspect ratio, use `[`Ratio(width: 
 ### borderRadius
 The radius for rounded corners of the cropping area.
 
+### forceInsideCropArea
+Whether image area must cover clip path.
+
 
 # Controller Methods
 
