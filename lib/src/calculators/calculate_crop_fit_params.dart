@@ -27,11 +27,13 @@ CropFitParams calculateCropFitParams({
       if (screenWidth <= screenHeight * aspectRatio) {
         cropSizeWidth = screenWidth * cropPercentage;
         cropSizeHeight = cropSizeWidth / aspectRatio;
-        defaultScale = cropSizeWidth * max(imageWidth / imageHeight, 1.0) / imageWidth;
+        defaultScale =
+            cropSizeWidth * max(imageWidth / imageHeight, 1.0) / imageWidth;
       } else {
         cropSizeHeight = screenHeight * cropPercentage;
         cropSizeWidth = cropSizeHeight * aspectRatio;
-        defaultScale = cropSizeHeight * max(imageHeight / imageWidth, 1.0) / imageHeight;
+        defaultScale =
+            cropSizeHeight * max(imageHeight / imageWidth, 1.0) / imageHeight;
       }
       break;
 
