@@ -335,7 +335,6 @@ class _CustomImageCropState extends State<CustomImageCrop>
     }
     final startX = data.x;
     final startY = data.y;
-    final startScale = data.scale;
     callback();
     final pathRect = _path.getBounds();
     final initialImageRect = _getInitialImageRect();
@@ -364,14 +363,10 @@ class _CustomImageCropState extends State<CustomImageCrop>
       }
       return;
     }
-    if (transition.angle == 0) {
-      _addTransitionInternal(CropImageData(scale: startScale / data.scale));
-      return;
-    }
     double minEdgeHalf =
         min(initialImageRect.width, initialImageRect.height) / 2;
     double adaptScale = _calculateScaleAfterRotate(
-        pathRect, startScale, initialImageRect, minEdgeHalf);
+        pathRect, data.scale, initialImageRect, minEdgeHalf);
     _addTransitionInternal(CropImageData(scale: adaptScale / data.scale));
   }
 
@@ -391,12 +386,14 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   double _getDistanceBetweenPointAndLine(
       Offset point, Offset lineStart, Offset lineEnd) {
-    double line1Slop =
-        (lineEnd.dy - lineStart.dy) / (lineEnd.dx - lineStart.dx);
-
-    if (line1Slop == 0) {
+    if (lineEnd.dy == lineStart.dy) {
       return (point.dy - lineStart.dy).abs();
     }
+    if (lineEnd.dx == lineStart.dx) {
+      return (point.dx - lineStart.dx).abs();
+    }
+    double line1Slop =
+        (lineEnd.dy - lineStart.dy) / (lineEnd.dx - lineStart.dx);
     double line1Delta = lineEnd.dy - lineEnd.dx * line1Slop;
     double line2Slop = -1 / line1Slop;
     double line2Delta = point.dy - point.dx * line2Slop;
