@@ -1,3 +1,7 @@
+## [0.0.13] - 2023-10-26
+
+- Added forceInsideCropArea, whether image area must cover clip path. Default is false
+
 ## [0.0.12] - 2023-09-08
 
 - Fixed issues with Ratio and CustomImageCrop
