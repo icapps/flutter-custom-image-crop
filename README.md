@@ -42,6 +42,10 @@ The color behind the image. This color will also be used when there are gaps/emp
 
 The shape of the cropping path.
 
+### maskShape
+
+The shape of the UI masking.
+
 ### cropPercentage
 
 How big the crop should be in regards to the width and height available to the cropping widget.
