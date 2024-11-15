@@ -100,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Expanded(
             child: CustomImageCrop(
+              cropOutSize: const Size(200, 200),
               cropController: controller,
               // image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
               image: const NetworkImage(
