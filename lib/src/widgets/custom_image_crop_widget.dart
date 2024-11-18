@@ -14,6 +14,9 @@ import 'package:vector_math/vector_math_64.dart' as vector_math;
 /// You can rotate, scale and translate either
 /// through gestures or a controller
 class CustomImageCrop extends StatefulWidget {
+  /// Output crop image size (357809764)
+  final Size? cropOutSize;
+
   /// The image to crop
   final ImageProvider image;
 
@@ -132,6 +135,7 @@ class CustomImageCrop extends StatefulWidget {
     this.borderRadius = 0,
     Paint? imagePaintDuringCrop,
     this.forceInsideCropArea = false,
+    this.cropOutSize,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
             (Paint()..filterQuality = FilterQuality.high),
@@ -598,6 +602,14 @@ class _CustomImageCropState extends State<CustomImageCrop>
       bgPaint,
     );
     canvas.save();
+
+    if (widget.cropOutSize != null) {
+      Matrix4 mat1 = Matrix4.diagonal3(vector_math.Vector3.all(1))
+        ..scale(widget.cropOutSize!.width / onCropParams.cropSizeWidth,
+            widget.cropOutSize!.height / onCropParams.cropSizeHeight);
+      canvas.transform(mat1.storage);
+    }
+
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
     canvas.drawImage(
@@ -614,8 +626,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
     ui.Picture picture = pictureRecorder.endRecording();
     ui.Image image = await picture.toImage(
-      onCropParams.cropSizeWidth.floor(),
-      onCropParams.cropSizeHeight.floor(),
+      widget.cropOutSize?.width.floor() ?? onCropParams.cropSizeWidth.floor(),
+      widget.cropOutSize?.height.floor() ?? onCropParams.cropSizeHeight.floor(),
     );
 
     // Adding compute would be preferrable. Unfortunately we cannot pass an ui image to this.
