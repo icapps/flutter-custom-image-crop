@@ -552,7 +552,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
   }
 
   @override
-  Future<MemoryImage?> onCropImage() async {
+  Future<MemoryImage?> onCropImage({Size? outSize}) async {
     if (_imageAsUIImage == null) {
       return null;
     }
@@ -598,6 +598,14 @@ class _CustomImageCropState extends State<CustomImageCrop>
       bgPaint,
     );
     canvas.save();
+    if (outSize != null) {
+      Matrix4 matrix4Scale = Matrix4.diagonal3(vector_math.Vector3.all(1))
+        ..scale(
+          outSize.width / onCropParams.cropSizeWidth,
+          outSize.height / onCropParams.cropSizeHeight,
+        );
+      canvas.transform(matrix4Scale.storage);
+    }
     canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
     canvas.drawImage(
@@ -614,8 +622,8 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
     ui.Picture picture = pictureRecorder.endRecording();
     ui.Image image = await picture.toImage(
-      onCropParams.cropSizeWidth.floor(),
-      onCropParams.cropSizeHeight.floor(),
+      outSize?.width.floor() ?? onCropParams.cropSizeWidth.floor(),
+      outSize?.height.floor() ?? onCropParams.cropSizeHeight.floor(),
     );
 
     // Adding compute would be preferrable. Unfortunately we cannot pass an ui image to this.
