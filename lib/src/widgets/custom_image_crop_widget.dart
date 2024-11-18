@@ -608,10 +608,9 @@ class _CustomImageCropState extends State<CustomImageCrop>
         ..scale(widget.cropOutSize!.width / onCropParams.cropSizeWidth,
             widget.cropOutSize!.height / onCropParams.cropSizeHeight);
       canvas.transform(mat1.storage);
-    } else {
-      canvas.clipPath(clipPath);
     }
 
+    canvas.clipPath(clipPath);
     canvas.transform(matrix4Image.storage);
     canvas.drawImage(
       _imageAsUIImage!,
