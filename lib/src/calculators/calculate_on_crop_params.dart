@@ -134,7 +134,7 @@ OnCropParams caclulateOnCropParams({
     cropSizeWidth = cropSizeMax;
     cropSizeHeight = cropSizeWidth / aspectRatio;
   } else {
-    cropSizeHeight = cropSizeMax;
+    cropSizeHeight = cropSizeMax / aspectRatio;
     cropSizeWidth = cropSizeHeight * aspectRatio;
   }
   return OnCropParams(
