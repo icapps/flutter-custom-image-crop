@@ -1,3 +1,8 @@
+## [0.0.14] - 2024-12-30
+
+- Added maskShape so you can crop using a different mask than for visualisation (e.g. circle mask for visualisation, but square mask for cropping)
+- Fixed issue with aspectratio < 1 resulting in a to big cropSizeHeight
+
 ## [0.0.13] - 2023-10-26
 
 - Added forceInsideCropArea, whether image area must cover clip path. Default is false
