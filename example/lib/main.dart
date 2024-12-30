@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:custom_image_crop/custom_image_crop.dart';
 import 'package:example/result_screen.dart';
@@ -101,9 +102,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: CustomImageCrop(
               cropController: controller,
-              // image: const AssetImage('assets/test.png'), // Any Imageprovider will work, try with a NetworkImage for example...
-              image: const NetworkImage(
-                  'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
+              // forceInsideCropArea: true,
+              image: const AssetImage(
+                  'assets/test.png'), // Any Imageprovider will work, try with a AssetImage or NetworkImage for example...
+              // image: const NetworkImage('https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
               shape: _currentShape,
               ratio: _currentShape == CustomCropShape.Ratio
                   ? Ratio(width: _width, height: _height)
@@ -114,12 +116,9 @@ class _MyHomePageState extends State<MyHomePage> {
               borderRadius:
                   _currentShape == CustomCropShape.Ratio ? _radius : 0,
               customProgressIndicator: const CupertinoActivityIndicator(),
+              outlineColor: Colors.red,
               imageFit: _imageFit,
-              pathPaint: Paint()
-                ..color = Colors.red
-                ..strokeWidth = 4.0
-                ..style = PaintingStyle.stroke
-                ..strokeJoin = StrokeJoin.round,
+              imageFilter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             ),
           ),
           Row(

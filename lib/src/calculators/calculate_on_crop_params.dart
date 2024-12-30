@@ -4,7 +4,7 @@ import 'package:custom_image_crop/src/models/params_model.dart';
 import 'package:custom_image_crop/src/widgets/custom_image_crop_widget.dart';
 
 /// Returns params to use for cropping image.
-OnCropParams caclulateOnCropParams({
+OnCropParams calculateOnCropParams({
   required double screenWidth,
   required double screenHeight,
   required double cropPercentage,
@@ -13,6 +13,7 @@ OnCropParams caclulateOnCropParams({
   required int imageWidth,
   required int imageHeight,
   required CustomImageFit imageFit,
+  required bool forceInsideCropArea,
 }) {
   /// the size of the area to crop (width and/or height depending on the aspect ratio)
   final double cropSizeMax;
@@ -21,7 +22,7 @@ OnCropParams caclulateOnCropParams({
   final double translateScale;
 
   /// used to adjust image scale
-  final double scale;
+  double scale;
 
   /// Temp variable used to calculate the translateScale
   final double uiSize;
@@ -55,16 +56,16 @@ OnCropParams caclulateOnCropParams({
       break;
 
     case CustomImageFit.fillCropWidth:
-      uiSize = screenWidth;
       cropSizeMax = imageWidth / min(1, aspectRatio);
-      translateScale = cropSizeMax / (uiSize * cropPercentage);
+      translateScale =
+          cropSizeMax / (min(screenWidth, screenHeight) * cropPercentage);
       scale = dataScale;
       break;
 
     case CustomImageFit.fillCropHeight:
-      uiSize = screenHeight;
       cropSizeMax = imageHeight * max(1, aspectRatio);
-      translateScale = cropSizeMax / (uiSize * cropPercentage);
+      translateScale =
+          cropSizeMax / (min(screenWidth, screenHeight) * cropPercentage);
       scale = dataScale;
       break;
 
@@ -137,6 +138,19 @@ OnCropParams caclulateOnCropParams({
     cropSizeHeight = cropSizeMax / aspectRatio;
     cropSizeWidth = cropSizeHeight * aspectRatio;
   }
+
+  if (forceInsideCropArea) {
+    final defaultScale = scale / dataScale;
+    var newDefaultScale = defaultScale;
+    if (imageWidth * defaultScale < cropSizeWidth) {
+      newDefaultScale = cropSizeWidth / imageWidth;
+    }
+    if (imageHeight * defaultScale < cropSizeHeight) {
+      newDefaultScale = cropSizeHeight / imageHeight;
+    }
+    scale = scale / defaultScale * newDefaultScale;
+  }
+
   return OnCropParams(
     cropSizeHeight: cropSizeHeight,
     cropSizeWidth: cropSizeWidth,

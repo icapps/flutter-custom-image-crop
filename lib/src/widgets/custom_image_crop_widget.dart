@@ -10,6 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 
+/// A method that draws a path with a given paint, outline color and stroke width
+typedef DrawPathMethod = CustomPaint Function(
+  Path path, {
+  Paint? pathPaint,
+  Color outlineColor,
+  double outlineStrokeWidth,
+});
+
 /// An image cropper that is customizable.
 /// You can rotate, scale and translate either
 /// through gestures or a controller
@@ -57,7 +65,7 @@ class CustomImageCrop extends StatefulWidget {
   /// The path drawer of the border see [DottedCropPathPainter],
   /// [SolidPathPainter] for more details or how to implement a
   /// custom one
-  final CustomPaint Function(Path, {Paint? pathPaint}) drawPath;
+  final DrawPathMethod drawPath;
 
   /// Custom paint options for drawing the cropping border.
   ///
@@ -104,6 +112,24 @@ class CustomImageCrop extends StatefulWidget {
   /// If use CustomCropShape.circle, the cropped image may have white blank.
   final bool forceInsideCropArea;
 
+  /// Sets the color of the outline of the crop selection area
+  /// This is provided to the [drawPath] method
+  /// Default is [Colors.white]
+  final Color outlineColor;
+
+  /// Sets the stroke width of the outline of the crop selection area
+  /// This is provided to the [drawPath] method
+  /// Default is 4.0
+  final double outlineStrokeWidth;
+
+  /// Adds a filter to overlay.
+  /// For example, consider using [ImageFilter.blur] to create a backdrop blur effect.
+  final ui.ImageFilter? imageFilter;
+
+  /// The blend mode of the image filter
+  /// Default is [BlendMode.srcOver]
+  final BlendMode imageFilterBlendMode;
+
   /// A custom image cropper widget
   ///
   /// Uses a `CustomImageCropController` to crop the image.
@@ -140,8 +166,13 @@ class CustomImageCrop extends StatefulWidget {
     this.borderRadius = 0,
     Paint? imagePaintDuringCrop,
     this.forceInsideCropArea = false,
+    this.outlineColor = Colors.white,
+    this.outlineStrokeWidth = 4.0,
+    this.imageFilter,
+    this.imageFilterBlendMode = BlendMode.srcOver,
     Key? key,
-  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ?? (Paint()..filterQuality = FilterQuality.high),
+  })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
+            (Paint()..filterQuality = FilterQuality.high),
         assert(
           !(shape == CustomCropShape.Ratio && ratio == null),
           "If shape is set to Ratio, ratio should not be null.",
@@ -152,7 +183,8 @@ class CustomImageCrop extends StatefulWidget {
   _CustomImageCropState createState() => _CustomImageCropState();
 }
 
-class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropListener {
+class _CustomImageCropState extends State<CustomImageCrop>
+    with CustomImageCropListener {
   CropImageData? _dataTransitionStart;
   late Path _path;
   late Path _maskPath;
@@ -226,6 +258,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
           screenHeight: _height,
           screenWidth: _width,
           aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+          forceInsideCropArea: widget.forceInsideCropArea,
         );
         final scale = data.scale * cropFitParams.additionalScale;
         _path = _getPath(
@@ -248,6 +281,24 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                 shape: widget.maskShape!,
               );
 
+        Widget overlay = Container(
+          color: widget.overlayColor,
+        );
+        final filter = widget.imageFilter;
+        if (filter != null) {
+          overlay = BackdropFilter(
+            filter: filter,
+            blendMode: widget.imageFilterBlendMode,
+            child: overlay,
+          );
+        }
+        overlay = IgnorePointer(
+          child: ClipPath(
+            clipper: InvertedClipper(_maskPath, _width, _height),
+            child: overlay,
+          ),
+        );
+
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
@@ -263,7 +314,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                   left: data.x + _width / 2,
                   top: data.y + _height / 2,
                   child: Transform(
-                    transform: Matrix4.diagonal3(vector_math.Vector3(scale, scale, scale))
+                    transform: Matrix4.diagonal3(
+                        vector_math.Vector3(scale, scale, scale))
                       ..rotateZ(data.angle)
                       ..translate(-image.width / 2, -image.height / 2),
                     child: Image(
@@ -271,15 +323,13 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
                     ),
                   ),
                 ),
-                IgnorePointer(
-                  child: ClipPath(
-                    clipper: InvertedClipper(_maskPath, _width, _height),
-                    child: Container(
-                      color: widget.overlayColor,
-                    ),
-                  ),
+                overlay,
+                widget.drawPath(
+                  _maskPath,
+                  pathPaint: widget.pathPaint,
+                  outlineColor: widget.outlineColor,
+                  outlineStrokeWidth: widget.outlineStrokeWidth,
                 ),
-                widget.drawPath(_maskPath, pathPaint: widget.pathPaint),
               ],
             ),
           ),
@@ -293,7 +343,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   }
 
   void onScaleUpdate(ScaleEvent event) {
-    final scale = widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
+    final scale =
+        widget.canScale ? event.scale : (_dataTransitionStart?.scale ?? 1.0);
 
     final angle = widget.canRotate ? event.rotationAngle : 0.0;
 
@@ -319,7 +370,8 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
   void onMoveUpdate(MoveEvent event) {
     if (!widget.canMove) return;
 
-    widget.cropController.addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
+    widget.cropController
+        .addTransition(CropImageData(x: event.delta.dx, y: event.delta.dy));
   }
 
   Rect _getInitialImageRect() {
@@ -333,9 +385,10 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
       screenHeight: _height,
       screenWidth: _width,
       aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+      forceInsideCropArea: widget.forceInsideCropArea,
     );
-    final initialWidth = _imageAsUIImage!.width * cropFitParams.additionalScale;
-    final initialHeight = _imageAsUIImage!.height * cropFitParams.additionalScale;
+    final initialWidth = image.width * cropFitParams.additionalScale;
+    final initialHeight = image.height * cropFitParams.additionalScale;
     return Rect.fromLTWH(
       (_width - initialWidth) / 2,
       (_height - initialHeight) / 2,
@@ -363,38 +416,53 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
 
     if (transition.x != 0 || transition.y != 0) {
       if (isRotated) {
-        _addTransitionInternal(CropImageData(x: startX - data.x, y: startY - data.y));
+        _addTransitionInternal(
+            CropImageData(x: startX - data.x, y: startY - data.y));
       } else {
         final imageRect = _getImageRect(initialImageRect, data.scale);
         double deltaX = min(pathRect.left - imageRect.left, 0);
-        deltaX = pathRect.right > imageRect.right ? pathRect.right - imageRect.right : deltaX;
+        deltaX = pathRect.right > imageRect.right
+            ? pathRect.right - imageRect.right
+            : deltaX;
         double deltaY = min(pathRect.top - imageRect.top, 0);
-        deltaY = pathRect.bottom > imageRect.bottom ? pathRect.bottom - imageRect.bottom : deltaY;
+        deltaY = pathRect.bottom > imageRect.bottom
+            ? pathRect.bottom - imageRect.bottom
+            : deltaY;
         _addTransitionInternal(CropImageData(x: deltaX, y: deltaY));
       }
       return;
     }
-    double minEdgeHalf = min(initialImageRect.width, initialImageRect.height) / 2;
-    double adaptScale = _calculateScaleAfterRotate(pathRect, data.scale, initialImageRect, minEdgeHalf);
+    double minEdgeHalf =
+        min(initialImageRect.width, initialImageRect.height) / 2;
+    double adaptScale = _calculateScaleAfterRotate(
+        pathRect, data.scale, initialImageRect, minEdgeHalf);
     _addTransitionInternal(CropImageData(scale: adaptScale / data.scale));
   }
 
   Rect _getImageRect(Rect initialImageRect, double currentScale) {
     final diffScale = (1 - currentScale) / 2;
-    final left = initialImageRect.left + diffScale * initialImageRect.width + data.x;
-    final top = initialImageRect.top + diffScale * initialImageRect.height + data.y;
-    Rect imageRect = Rect.fromLTWH(left, top, currentScale * initialImageRect.width, currentScale * initialImageRect.height);
+    final left =
+        initialImageRect.left + diffScale * initialImageRect.width + data.x;
+    final top =
+        initialImageRect.top + diffScale * initialImageRect.height + data.y;
+    Rect imageRect = Rect.fromLTWH(
+        left,
+        top,
+        currentScale * initialImageRect.width,
+        currentScale * initialImageRect.height);
     return imageRect;
   }
 
-  double _getDistanceBetweenPointAndLine(Offset point, Offset lineStart, Offset lineEnd) {
+  double _getDistanceBetweenPointAndLine(
+      Offset point, Offset lineStart, Offset lineEnd) {
     if (lineEnd.dy == lineStart.dy) {
       return (point.dy - lineStart.dy).abs();
     }
     if (lineEnd.dx == lineStart.dx) {
       return (point.dx - lineStart.dx).abs();
     }
-    double line1Slop = (lineEnd.dy - lineStart.dy) / (lineEnd.dx - lineStart.dx);
+    double line1Slop =
+        (lineEnd.dy - lineStart.dy) / (lineEnd.dx - lineStart.dx);
     double line1Delta = lineEnd.dy - lineEnd.dx * line1Slop;
     double line2Slop = -1 / line1Slop;
     double line2Delta = point.dy - point.dx * line2Slop;
@@ -403,11 +471,13 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     return (Offset(crossPointX, crossPointY) - point).distance;
   }
 
-  bool _isContainPath(Rect initialImageRect, Rect pathRect, double currentScale) {
+  bool _isContainPath(
+      Rect initialImageRect, Rect pathRect, double currentScale) {
     final imageRect = _getImageRect(initialImageRect, currentScale);
     Offset topLeft, topRight, bottomLeft, bottomRight;
     final rad = atan(imageRect.height / imageRect.width);
-    final len = sqrt(pow(imageRect.width / 2, 2) + pow(imageRect.height / 2, 2));
+    final len =
+        sqrt(pow(imageRect.width / 2, 2) + pow(imageRect.height / 2, 2));
     bool isRotated = data.angle != 0;
 
     if (isRotated) {
@@ -418,9 +488,11 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
       final cosCounterClockValue = len * cos(counterClockAngle);
       final sinCounterClockValue = len * sin(counterClockAngle);
       bottomRight = imageRect.center.translate(cosClockValue, sinClockValue);
-      topRight = imageRect.center.translate(cosCounterClockValue, -sinCounterClockValue);
+      topRight = imageRect.center
+          .translate(cosCounterClockValue, -sinCounterClockValue);
       topLeft = imageRect.center.translate(-cosClockValue, -sinClockValue);
-      bottomLeft = imageRect.center.translate(-cosCounterClockValue, sinCounterClockValue);
+      bottomLeft = imageRect.center
+          .translate(-cosCounterClockValue, sinCounterClockValue);
     } else {
       bottomRight = imageRect.bottomRight;
       topRight = imageRect.topRight;
@@ -431,10 +503,15 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     if (widget.shape == CustomCropShape.Circle) {
       final anchor = max(pathRect.width, pathRect.height) / 2;
       final pathCenter = pathRect.center;
-      return _getDistanceBetweenPointAndLine(pathCenter, topLeft, topRight) >= anchor &&
-          _getDistanceBetweenPointAndLine(pathCenter, topRight, bottomRight) >= anchor &&
-          _getDistanceBetweenPointAndLine(pathCenter, bottomLeft, bottomRight) >= anchor &&
-          _getDistanceBetweenPointAndLine(pathCenter, topLeft, bottomLeft) >= anchor;
+      return _getDistanceBetweenPointAndLine(pathCenter, topLeft, topRight) >=
+              anchor &&
+          _getDistanceBetweenPointAndLine(pathCenter, topRight, bottomRight) >=
+              anchor &&
+          _getDistanceBetweenPointAndLine(
+                  pathCenter, bottomLeft, bottomRight) >=
+              anchor &&
+          _getDistanceBetweenPointAndLine(pathCenter, topLeft, bottomLeft) >=
+              anchor;
     }
 
     if (isRotated) {
@@ -444,19 +521,28 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
         ..lineTo(bottomRight.dx, bottomRight.dy)
         ..lineTo(bottomLeft.dx, bottomLeft.dy)
         ..close();
-      return imagePath.contains(pathRect.topLeft) && imagePath.contains(pathRect.topRight) && imagePath.contains(pathRect.bottomLeft) && imagePath.contains(pathRect.bottomRight);
+      return imagePath.contains(pathRect.topLeft) &&
+          imagePath.contains(pathRect.topRight) &&
+          imagePath.contains(pathRect.bottomLeft) &&
+          imagePath.contains(pathRect.bottomRight);
     } else {
-      return imageRect.contains(pathRect.topLeft) && imageRect.contains(pathRect.topRight) && imageRect.contains(pathRect.bottomLeft) && imageRect.contains(pathRect.bottomRight);
+      return imageRect.contains(pathRect.topLeft) &&
+          imageRect.contains(pathRect.topRight) &&
+          imageRect.contains(pathRect.bottomLeft) &&
+          imageRect.contains(pathRect.bottomRight);
     }
   }
 
-  double _calculateScaleAfterRotate(Rect pathRect, double startScale, Rect initialImageRect, double minEdgeHalf) {
+  double _calculateScaleAfterRotate(Rect pathRect, double startScale,
+      Rect initialImageRect, double minEdgeHalf) {
     final imageCenter = initialImageRect.center.translate(data.x, data.y);
     final topLeftDistance = (pathRect.topLeft - imageCenter).distance;
     final topRightDistance = (pathRect.topRight - imageCenter).distance;
     final bottomLeftDistance = (pathRect.bottomLeft - imageCenter).distance;
     final bottomRightDistance = (pathRect.bottomRight - imageCenter).distance;
-    final maxDistance = max(max(max(topLeftDistance, topRightDistance), bottomLeftDistance), bottomRightDistance);
+    final maxDistance = max(
+        max(max(topLeftDistance, topRightDistance), bottomLeftDistance),
+        bottomRightDistance);
     double endScale = maxDistance / minEdgeHalf;
 
     if (startScale >= endScale) {
@@ -544,7 +630,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
     final imageHeight = _imageAsUIImage!.height;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    final onCropParams = caclulateOnCropParams(
+    final onCropParams = calculateOnCropParams(
       cropPercentage: widget.cropPercentage,
       imageFit: widget.imageFit,
       imageHeight: imageHeight,
@@ -553,6 +639,7 @@ class _CustomImageCropState extends State<CustomImageCrop> with CustomImageCropL
       screenWidth: _width,
       dataScale: data.scale,
       aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+      forceInsideCropArea: widget.forceInsideCropArea,
     );
     final clipPath = Path.from(_getPath(
       cropWidth: onCropParams.cropSizeWidth,
