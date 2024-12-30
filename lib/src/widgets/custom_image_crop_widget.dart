@@ -10,6 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 
+/// A method that draws a path with a given paint, outline color and stroke width
+typedef DrawPathMethod = CustomPaint Function(
+  Path path, {
+  Paint? pathPaint,
+  Color outlineColor,
+  double outlineStrokeWidth,
+});
+
 /// An image cropper that is customizable.
 /// You can rotate, scale and translate either
 /// through gestures or a controller
@@ -57,7 +65,7 @@ class CustomImageCrop extends StatefulWidget {
   /// The path drawer of the border see [DottedCropPathPainter],
   /// [SolidPathPainter] for more details or how to implement a
   /// custom one
-  final CustomPaint Function(Path, {Paint? pathPaint}) drawPath;
+  final DrawPathMethod drawPath;
 
   /// Custom paint options for drawing the cropping border.
   ///
@@ -104,6 +112,24 @@ class CustomImageCrop extends StatefulWidget {
   /// If use CustomCropShape.circle, the cropped image may have white blank.
   final bool forceInsideCropArea;
 
+  /// Sets the color of the outline of the crop selection area
+  /// This is provided to the [drawPath] method
+  /// Default is [Colors.white]
+  final Color outlineColor;
+
+  /// Sets the stroke width of the outline of the crop selection area
+  /// This is provided to the [drawPath] method
+  /// Default is 4.0
+  final double outlineStrokeWidth;
+
+  /// Adds a filter to overlay.
+  /// For example, consider using [ImageFilter.blur] to create a backdrop blur effect.
+  final ui.ImageFilter? imageFilter;
+
+  /// The blend mode of the image filter
+  /// Default is [BlendMode.srcOver]
+  final BlendMode imageFilterBlendMode;
+
   /// A custom image cropper widget
   ///
   /// Uses a `CustomImageCropController` to crop the image.
@@ -140,6 +166,10 @@ class CustomImageCrop extends StatefulWidget {
     this.borderRadius = 0,
     Paint? imagePaintDuringCrop,
     this.forceInsideCropArea = false,
+    this.outlineColor = Colors.white,
+    this.outlineStrokeWidth = 4.0,
+    this.imageFilter,
+    this.imageFilterBlendMode = BlendMode.srcOver,
     Key? key,
   })  : this.imagePaintDuringCrop = imagePaintDuringCrop ??
             (Paint()..filterQuality = FilterQuality.high),
@@ -250,6 +280,24 @@ class _CustomImageCropState extends State<CustomImageCrop>
                 shape: widget.maskShape!,
               );
 
+        Widget overlay = Container(
+          color: widget.overlayColor,
+        );
+        final filter = widget.imageFilter;
+        if (filter != null) {
+          overlay = BackdropFilter(
+            filter: filter,
+            blendMode: widget.imageFilterBlendMode,
+            child: overlay,
+          );
+        }
+        overlay = IgnorePointer(
+          child: ClipPath(
+            clipper: InvertedClipper(_maskPath, _width, _height),
+            child: overlay,
+          ),
+        );
+
         return XGestureDetector(
           onMoveStart: onMoveStart,
           onMoveUpdate: onMoveUpdate,
@@ -274,15 +322,13 @@ class _CustomImageCropState extends State<CustomImageCrop>
                     ),
                   ),
                 ),
-                IgnorePointer(
-                  child: ClipPath(
-                    clipper: InvertedClipper(_maskPath, _width, _height),
-                    child: Container(
-                      color: widget.overlayColor,
-                    ),
-                  ),
+                overlay,
+                widget.drawPath(
+                  _maskPath,
+                  pathPaint: widget.pathPaint,
+                  outlineColor: widget.outlineColor,
+                  outlineStrokeWidth: widget.outlineStrokeWidth,
                 ),
-                widget.drawPath(_maskPath, pathPaint: widget.pathPaint),
               ],
             ),
           ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Draw a solid path around the given path
 class SolidCropPathPainter extends CustomPainter {
-  static const _strokeWidth = 4.0;
   final Path _path;
   final Paint pathPaint;
 
@@ -10,7 +9,12 @@ class SolidCropPathPainter extends CustomPainter {
   SolidCropPathPainter(this._path, this.pathPaint);
 
   /// Return a CustomPaint widget with the current CustomPainter
-  static CustomPaint drawPath(Path path, {Paint? pathPaint}) {
+  static CustomPaint drawPath(
+    Path path, {
+    Paint? pathPaint,
+    Color outlineColor = Colors.white,
+    double outlineStrokeWidth = 4.0,
+  }) {
     if (pathPaint != null) {
       return CustomPaint(
         painter: SolidCropPathPainter(path, pathPaint),
@@ -20,8 +24,8 @@ class SolidCropPathPainter extends CustomPainter {
         painter: SolidCropPathPainter(
           path,
           Paint()
-            ..color = Colors.white
-            ..strokeWidth = _strokeWidth
+            ..color = outlineColor
+            ..strokeWidth = outlineStrokeWidth
             ..style = PaintingStyle.stroke
             ..strokeJoin = StrokeJoin.round,
         ),

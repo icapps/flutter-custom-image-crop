@@ -1,7 +1,9 @@
-## [0.0.14] - 2024-12-30
+## [0.1.0] - 2024-12-30
 
 - Added maskShape so you can crop using a different mask than for visualisation (e.g. circle mask for visualisation, but square mask for cropping)
+- Added imageFilter and imageFilterBlendMode so you can add filters like blur the image outside the crop area (for example ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0))
 - Fixed issue with aspectratio < 1 resulting in a to big cropSizeHeight
+- [Possibly breaking] Added outlineStrokeWidth and outlineColor to CustomImageCrop to customize the outline of the crop shape, if you provided custom drawPath method, you will need to add these to the method, but you do not need to use them if you don't want to customize the outline from the CustomImageCrop widget
 
 ## [0.0.13] - 2023-10-26
 

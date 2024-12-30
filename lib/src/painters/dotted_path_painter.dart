@@ -10,13 +10,18 @@ class DottedCropPathPainter extends CustomPainter {
   /// Draw a dotted path around the given path
   DottedCropPathPainter(
     this._path, {
+    required this.pathPaint,
     this.dashWidth = 10.0,
     this.dashSpace = 5.0,
-    required this.pathPaint,
   });
 
   /// Return a CustomPaint widget with the current CustomPainter
-  static CustomPaint drawPath(Path path, {Paint? pathPaint}) {
+  static CustomPaint drawPath(
+    Path path, {
+    Paint? pathPaint,
+    Color outlineColor = Colors.white,
+    double outlineStrokeWidth = 4.0,
+  }) {
     if (pathPaint != null) {
       return CustomPaint(
         painter: DottedCropPathPainter(path, pathPaint: pathPaint),
@@ -26,8 +31,8 @@ class DottedCropPathPainter extends CustomPainter {
         painter: DottedCropPathPainter(
           path,
           pathPaint: Paint()
-            ..color = Colors.white
-            ..strokeWidth = 4.0
+            ..color = outlineColor
+            ..strokeWidth = outlineStrokeWidth
             ..style = PaintingStyle.stroke
             ..strokeJoin = StrokeJoin.round,
         ),
@@ -49,7 +54,10 @@ class DottedCropPathPainter extends CustomPainter {
         distance += dashSpace;
       }
     }
-    canvas.drawPath(dashPath, pathPaint);
+    canvas.drawPath(
+      dashPath,
+      pathPaint,
+    );
   }
 
   @override
