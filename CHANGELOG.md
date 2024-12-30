@@ -1,3 +1,7 @@
+## [0.1.1] - 2024-12-30
+
+- Fixed issues with imagefit and forceInsideCropArea resulting in crops outside the crop area and/or wrong crops
+
 ## [0.1.0] - 2024-12-30
 
 - Added maskShape so you can crop using a different mask than for visualisation (e.g. circle mask for visualisation, but square mask for cropping)

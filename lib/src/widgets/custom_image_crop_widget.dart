@@ -258,6 +258,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
           screenHeight: _height,
           screenWidth: _width,
           aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+          forceInsideCropArea: widget.forceInsideCropArea,
         );
         final scale = data.scale * cropFitParams.additionalScale;
         _path = _getPath(
@@ -384,10 +385,10 @@ class _CustomImageCropState extends State<CustomImageCrop>
       screenHeight: _height,
       screenWidth: _width,
       aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+      forceInsideCropArea: widget.forceInsideCropArea,
     );
-    final initialWidth = _imageAsUIImage!.width * cropFitParams.additionalScale;
-    final initialHeight =
-        _imageAsUIImage!.height * cropFitParams.additionalScale;
+    final initialWidth = image.width * cropFitParams.additionalScale;
+    final initialHeight = image.height * cropFitParams.additionalScale;
     return Rect.fromLTWH(
       (_width - initialWidth) / 2,
       (_height - initialHeight) / 2,
@@ -629,7 +630,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
     final imageHeight = _imageAsUIImage!.height;
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    final onCropParams = caclulateOnCropParams(
+    final onCropParams = calculateOnCropParams(
       cropPercentage: widget.cropPercentage,
       imageFit: widget.imageFit,
       imageHeight: imageHeight,
@@ -638,6 +639,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
       screenWidth: _width,
       dataScale: data.scale,
       aspectRatio: (widget.ratio?.width ?? 1) / (widget.ratio?.height ?? 1),
+      forceInsideCropArea: widget.forceInsideCropArea,
     );
     final clipPath = Path.from(_getPath(
       cropWidth: onCropParams.cropSizeWidth,

@@ -12,6 +12,7 @@ CropFitParams calculateCropFitParams({
   required int imageHeight,
   required CustomImageFit imageFit,
   required double aspectRatio,
+  required bool forceInsideCropArea,
 }) {
   /// the width of the area to crop
   final double cropSizeWidth;
@@ -20,7 +21,7 @@ CropFitParams calculateCropFitParams({
   final double cropSizeHeight;
 
   /// used to adjust image scale
-  final double defaultScale;
+  double defaultScale;
 
   switch (imageFit) {
     case CustomImageFit.fillCropSpace:
@@ -116,6 +117,15 @@ CropFitParams calculateCropFitParams({
       }
       defaultScale = screenWidth / imageWidth;
       break;
+  }
+
+  if (forceInsideCropArea) {
+    if (imageWidth * defaultScale < cropSizeWidth) {
+      defaultScale = cropSizeWidth / imageWidth;
+    }
+    if (imageHeight * defaultScale < cropSizeHeight) {
+      defaultScale = cropSizeHeight / imageHeight;
+    }
   }
 
   return CropFitParams(
