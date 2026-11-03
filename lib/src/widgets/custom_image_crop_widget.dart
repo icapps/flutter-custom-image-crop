@@ -397,172 +397,60 @@ class _CustomImageCropState extends State<CustomImageCrop>
     );
   }
 
-  void _correctTransition(CropImageData transition, VoidCallback callback) {
-    if (!widget.forceInsideCropArea || _imageAsUIImage == null) {
-      callback();
-      return;
-    }
-    final startX = data.x;
-    final startY = data.y;
+  /// Corrects the transition to ensure that the image fully covers
+  /// the crop area if [CustomImageCrop.forceInsideCropArea]
+  /// is true.
+  ///
+  /// Specifically, limits how far the image can shrink, then moves
+  /// it if needed so no empty space appears inside the crop area.
+  ///
+  /// For rotated images, calculates these limits in the image
+  /// coordinate system, then converts the position back.
+  void _correctTransition(VoidCallback callback) {
     callback();
-    final pathRect = _path.getBounds();
-    final initialImageRect = _getInitialImageRect();
-    bool isContainPath = _isContainPath(initialImageRect, pathRect, data.scale);
-    bool isRotated = data.angle != 0;
+    if (!widget.forceInsideCropArea || _imageAsUIImage == null) return;
 
-    if (isContainPath) {
-      return;
+    final cropRect = _path.getBounds();
+    final imageRect = _getInitialImageRect();
+    final cosAngle = cos(data.angle);
+    final sinAngle = sin(data.angle);
+
+    // Project the crop area onto the rotated image axes.
+    final isCircle = widget.shape == CustomCropShape.Circle;
+    final cropHalfWidth = isCircle
+        ? cropRect.width / 2
+        : (cosAngle.abs() * cropRect.width + sinAngle.abs() * cropRect.height) /
+            2;
+
+    final cropHalfHeight = isCircle
+        ? cropRect.height / 2
+        : (sinAngle.abs() * cropRect.width + cosAngle.abs() * cropRect.height) /
+            2;
+
+    final minScale = max(
+      cropHalfWidth * 2 / imageRect.width,
+      cropHalfHeight * 2 / imageRect.height,
+    );
+
+    if (data.scale < minScale) {
+      _addTransitionInternal(CropImageData(scale: minScale / data.scale));
     }
 
-    if (transition.x != 0 || transition.y != 0) {
-      if (isRotated) {
-        _addTransitionInternal(
-            CropImageData(x: startX - data.x, y: startY - data.y));
-      } else {
-        final imageRect = _getImageRect(initialImageRect, data.scale);
-        double deltaX = min(pathRect.left - imageRect.left, 0);
-        deltaX = pathRect.right > imageRect.right
-            ? pathRect.right - imageRect.right
-            : deltaX;
-        double deltaY = min(pathRect.top - imageRect.top, 0);
-        deltaY = pathRect.bottom > imageRect.bottom
-            ? pathRect.bottom - imageRect.bottom
-            : deltaY;
-        _addTransitionInternal(CropImageData(x: deltaX, y: deltaY));
-      }
-      return;
-    }
-    double minEdgeHalf =
-        min(initialImageRect.width, initialImageRect.height) / 2;
-    double adaptScale = _calculateScaleAfterRotate(
-        pathRect, data.scale, initialImageRect, minEdgeHalf);
-    _addTransitionInternal(CropImageData(scale: adaptScale / data.scale));
-  }
+    // Clamp the image center in image coordinates, then rotate it back.
+    final center = imageRect.center + Offset(data.x, data.y) - cropRect.center;
+    final maxX = max(0.0, imageRect.width * data.scale / 2 - cropHalfWidth);
+    final maxY = max(0.0, imageRect.height * data.scale / 2 - cropHalfHeight);
+    final x = (cosAngle * center.dx + sinAngle * center.dy).clamp(-maxX, maxX);
+    final y = (-sinAngle * center.dx + cosAngle * center.dy).clamp(-maxY, maxY);
 
-  Rect _getImageRect(Rect initialImageRect, double currentScale) {
-    final diffScale = (1 - currentScale) / 2;
-    final left =
-        initialImageRect.left + diffScale * initialImageRect.width + data.x;
-    final top =
-        initialImageRect.top + diffScale * initialImageRect.height + data.y;
-    Rect imageRect = Rect.fromLTWH(
-        left,
-        top,
-        currentScale * initialImageRect.width,
-        currentScale * initialImageRect.height);
-    return imageRect;
-  }
+    final correctedCenter = cropRect.center +
+        Offset(cosAngle * x - sinAngle * y, sinAngle * x + cosAngle * y);
 
-  double _getDistanceBetweenPointAndLine(
-      Offset point, Offset lineStart, Offset lineEnd) {
-    if (lineEnd.dy == lineStart.dy) {
-      return (point.dy - lineStart.dy).abs();
-    }
-    if (lineEnd.dx == lineStart.dx) {
-      return (point.dx - lineStart.dx).abs();
-    }
-    double line1Slop =
-        (lineEnd.dy - lineStart.dy) / (lineEnd.dx - lineStart.dx);
-    double line1Delta = lineEnd.dy - lineEnd.dx * line1Slop;
-    double line2Slop = -1 / line1Slop;
-    double line2Delta = point.dy - point.dx * line2Slop;
-    double crossPointX = (line2Delta - line1Delta) / (line1Slop - line2Slop);
-    double crossPointY = line1Slop * crossPointX + line1Delta;
-    return (Offset(crossPointX, crossPointY) - point).distance;
-  }
+    final translation = correctedCenter - imageRect.center;
 
-  bool _isContainPath(
-      Rect initialImageRect, Rect pathRect, double currentScale) {
-    final imageRect = _getImageRect(initialImageRect, currentScale);
-    Offset topLeft, topRight, bottomLeft, bottomRight;
-    final rad = atan(imageRect.height / imageRect.width);
-    final len =
-        sqrt(pow(imageRect.width / 2, 2) + pow(imageRect.height / 2, 2));
-    bool isRotated = data.angle != 0;
-
-    if (isRotated) {
-      final clockAngle = rad + data.angle;
-      final counterClockAngle = rad - data.angle;
-      final cosClockValue = len * cos(clockAngle);
-      final sinClockValue = len * sin(clockAngle);
-      final cosCounterClockValue = len * cos(counterClockAngle);
-      final sinCounterClockValue = len * sin(counterClockAngle);
-      bottomRight = imageRect.center.translate(cosClockValue, sinClockValue);
-      topRight = imageRect.center
-          .translate(cosCounterClockValue, -sinCounterClockValue);
-      topLeft = imageRect.center.translate(-cosClockValue, -sinClockValue);
-      bottomLeft = imageRect.center
-          .translate(-cosCounterClockValue, sinCounterClockValue);
-    } else {
-      bottomRight = imageRect.bottomRight;
-      topRight = imageRect.topRight;
-      topLeft = imageRect.topLeft;
-      bottomLeft = imageRect.bottomLeft;
-    }
-
-    if (widget.shape == CustomCropShape.Circle) {
-      final anchor = max(pathRect.width, pathRect.height) / 2;
-      final pathCenter = pathRect.center;
-      return _getDistanceBetweenPointAndLine(pathCenter, topLeft, topRight) >=
-              anchor &&
-          _getDistanceBetweenPointAndLine(pathCenter, topRight, bottomRight) >=
-              anchor &&
-          _getDistanceBetweenPointAndLine(
-                  pathCenter, bottomLeft, bottomRight) >=
-              anchor &&
-          _getDistanceBetweenPointAndLine(pathCenter, topLeft, bottomLeft) >=
-              anchor;
-    }
-
-    if (isRotated) {
-      Path imagePath = Path()
-        ..moveTo(topLeft.dx, topLeft.dy)
-        ..lineTo(topRight.dx, topRight.dy)
-        ..lineTo(bottomRight.dx, bottomRight.dy)
-        ..lineTo(bottomLeft.dx, bottomLeft.dy)
-        ..close();
-      return imagePath.contains(pathRect.topLeft) &&
-          imagePath.contains(pathRect.topRight) &&
-          imagePath.contains(pathRect.bottomLeft) &&
-          imagePath.contains(pathRect.bottomRight);
-    } else {
-      return imageRect.contains(pathRect.topLeft) &&
-          imageRect.contains(pathRect.topRight) &&
-          imageRect.contains(pathRect.bottomLeft) &&
-          imageRect.contains(pathRect.bottomRight);
-    }
-  }
-
-  double _calculateScaleAfterRotate(Rect pathRect, double startScale,
-      Rect initialImageRect, double minEdgeHalf) {
-    final imageCenter = initialImageRect.center.translate(data.x, data.y);
-    final topLeftDistance = (pathRect.topLeft - imageCenter).distance;
-    final topRightDistance = (pathRect.topRight - imageCenter).distance;
-    final bottomLeftDistance = (pathRect.bottomLeft - imageCenter).distance;
-    final bottomRightDistance = (pathRect.bottomRight - imageCenter).distance;
-    final maxDistance = max(
-        max(max(topLeftDistance, topRightDistance), bottomLeftDistance),
-        bottomRightDistance);
-    double endScale = maxDistance / minEdgeHalf;
-
-    if (startScale >= endScale) {
-      return endScale;
-    }
-
-    ///use binary search to find best scale which just contain path.
-    ///Also, we can use imageCenter、imageLine(longest one) and path vertex to calculate.
-    double step = 1 / minEdgeHalf;
-
-    while ((endScale - startScale).abs() > step) {
-      double midScale = (endScale + startScale) / 2;
-
-      if (_isContainPath(initialImageRect, pathRect, midScale)) {
-        endScale = midScale;
-      } else {
-        startScale = midScale + step;
-      }
-    }
-    return endScale;
+    _addTransitionInternal(
+      CropImageData(x: translation.dx - data.x, y: translation.dy - data.y),
+    );
   }
 
   Path _getPath({
@@ -702,7 +590,7 @@ class _CustomImageCropState extends State<CustomImageCrop>
 
   @override
   void addTransition(CropImageData transition) {
-    _correctTransition(transition, () {
+    _correctTransition(() {
       _addTransitionInternal(transition);
     });
   }
