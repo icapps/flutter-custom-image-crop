@@ -440,8 +440,13 @@ class _CustomImageCropState extends State<CustomImageCrop>
     final center = imageRect.center + Offset(data.x, data.y) - cropRect.center;
     final maxX = max(0.0, imageRect.width * data.scale / 2 - cropHalfWidth);
     final maxY = max(0.0, imageRect.height * data.scale / 2 - cropHalfHeight);
-    final x = (cosAngle * center.dx + sinAngle * center.dy).clamp(-maxX, maxX);
-    final y = (-sinAngle * center.dx + cosAngle * center.dy).clamp(-maxY, maxY);
+    final localX = cosAngle * center.dx + sinAngle * center.dy;
+    final localY = -sinAngle * center.dx + cosAngle * center.dy;
+    final x = localX.clamp(-maxX, maxX);
+    final y = localY.clamp(-maxY, maxY);
+
+    // The image already covers the crop area, so there is nothing to move.
+    if (x == localX && y == localY) return;
 
     final correctedCenter = cropRect.center +
         Offset(cosAngle * x - sinAngle * y, sinAngle * x + cosAngle * y);

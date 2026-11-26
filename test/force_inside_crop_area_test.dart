@@ -224,6 +224,23 @@ void main() {
       _expectCropAreaCovered(tester, _landscapeSquare);
     });
 
+    testWidgets('a transition that needs no correction is applied as given',
+        (tester) async {
+      final controller = await _pumpCrop(tester, _landscapeSquare);
+
+      await _addTransition(
+        tester,
+        controller,
+        CropImageData(x: 13.37, y: -7.5, angle: 0.3, scale: 1.8),
+      );
+
+      final data = controller.cropImageData!;
+      expect(data.x, 13.37);
+      expect(data.y, -7.5);
+      expect(data.angle, 0.3);
+      expect(data.scale, 1.8);
+    });
+
     testWidgets('a circle crop area cannot be panned off the image',
         (tester) async {
       final controller = await _pumpCrop(tester, _landscapeCircle);
