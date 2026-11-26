@@ -1,3 +1,9 @@
+## [0.1.2] - 2026-11-26
+
+- Fixed zooming out after panning when forceInsideCropArea is enabled: the image now shrinks to the smallest scale that still covers the crop area and moves back into place, instead of being enlarged again
+- forceInsideCropArea now also keeps rotated images and circle crop areas covered: panning slides along the image edge instead of being blocked, and rotating moves the image back into place, enlarging it only as much as the rotated crop area needs
+- Added tests for forceInsideCropArea
+
 ## [0.1.1] - 2024-12-30
 
 - Fixed issues with imagefit and forceInsideCropArea resulting in crops outside the crop area and/or wrong crops

@@ -76,7 +76,15 @@ To create a rectangular crop area with a 16:9 aspect ratio, use `[`Ratio(width: 
 The radius for rounded corners of the cropping area.
 
 ### forceInsideCropArea
-Whether image area must cover clip path.
+Whether the image must always cover the crop area. Default is `false`.
+
+When `true`, gestures and `addTransition` never leave empty space inside the crop area:
+
+- Panning stops where the image edge meets the crop edge.
+- Zooming out stops at the smallest scale that still covers the crop area. If the image was panned, it moves back so it keeps covering the crop area.
+- Rotating enlarges the image only as much as the rotated crop area needs, and moves it back if needed.
+
+`setData` and `reset` set the values you pass without this correction.
 
 
 # Controller Methods
